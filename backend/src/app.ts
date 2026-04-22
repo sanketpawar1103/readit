@@ -4,8 +4,12 @@ import { cors } from "hono/cors";
 import { addPost, deletePost, loadPosts } from "./handler.js";
 import { PostStoreDB } from "./post_store_db.ts";
 
+type AppVariables = {
+  store: PostStoreDB;
+};
+
 export const createApp = (store: PostStoreDB) => {
-  const app = new Hono();
+  const app = new Hono<{ Variables: AppVariables }>();
   app.use((c, next) => {
     c.set("store", store);
     return next();

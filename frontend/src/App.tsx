@@ -43,8 +43,8 @@ const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        const id: string = await fetchPost("add-post", { title, body });
-        saveThePost({ act: "add-post", title, id, body });
+        const _id: string = await fetchPost("add-post", { title, body });
+        saveThePost({ act: "add-post", title, _id, body });
       }}
     >
       <FormTitle />
@@ -78,7 +78,6 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
       <button
         type="button"
         onClick={async () => {
-          console.log({ post });
           await fetchPost("delete-post", { id: post._id });
           deleteThePost({ act: "delete-post", post });
         }}
@@ -91,7 +90,7 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
 };
 
 const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
-  posts.map((p) => <Feed post={p} key={p.id} deleteThePost={deleteThePost} />);
+  posts.map((p) => <Feed post={p} key={p._id} deleteThePost={deleteThePost} />);
 
 const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
   return (

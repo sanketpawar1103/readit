@@ -1,4 +1,4 @@
-import { Db } from "mongodb";
+import { Db, ObjectId } from "mongodb";
 
 export class PostStoreDB {
   #posts;
@@ -11,6 +11,12 @@ export class PostStoreDB {
     const result = await this.#posts.insertOne({ title, body });
 
     return result.insertedId.toString();
+  }
+
+  async deletePost(id: string) {
+    await this.#posts.deleteOne({ _id: new ObjectId(id) });
+
+    return id;
   }
 
   async loadPosts() {
