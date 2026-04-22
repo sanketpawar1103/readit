@@ -1,21 +1,49 @@
-import { useState } from "react";
+import { useEffect, useReducer, useState } from "react";
+import { type Action, type Post, Reducer } from "./reducer";
 
-type Post = {
-  title: string;
-  body: string;
+type Feed = {
+  post: Post;
+  posts: Post[];
+  deleteThePost: (act: string, x: Post[]) => void;
 };
+
+type DisplayFormProps = {
+  saveThePost: (action: Action) => void;
+  posts: Post[];
+};
+
+type DeletePost = {
+  posts: Post[];
+  deleteThePost: (action: Action) => void;
+};
+
+type FeedProps = {
+  post: Post;
+  deleteThePost: (action: Action) => void;
+};
+
+const fetPost = (body: { title: string; body: string }) =>
+  fetch("http://localhost:8000/add-post", {
+    method: "post",
+    body: JSON.stringify(body),
+  })
+    .then((x) => x.json())
+    .then((x) => x);
 
 const FormTitle = () => <h1>Create Post</h1>;
 
-const DisplayForm = ({ saveThePost, posts }) => {
+const DisplayForm = ({ saveThePost, posts }: DisplayFormProps) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        saveThePost([{ title, body }, ...posts]);
+        // const id = posts[posts.length - 1].id + 1 || 1;
+        const id: number = await fetPost({ title, body });
+        console.log(id);
+        saveThePost({ act: "add-post", title, id, body });
       }}
     >
       <FormTitle />
@@ -25,6 +53,7 @@ const DisplayForm = ({ saveThePost, posts }) => {
         placeholder="Enter a title..."
         name="title"
         onChange={(e) => setTitle(e.target.value)}
+        required
       />
       <p>Body</p>
       <textarea
@@ -40,35 +69,49 @@ const DisplayForm = ({ saveThePost, posts }) => {
   );
 };
 
-const Feed = ({ post }) => {
+const Feed = ({ post, deleteThePost }: FeedProps) => {
   return (
     <>
       <h2>{post.title}</h2>
       <p>{post.body}</p>
+      <button
+        onClick={() => {
+          deleteThePost({ act: "delete-post", post });
+        }}
+      >
+        Delete
+      </button>
+      <hr />
     </>
   );
 };
 
-const CreateFeed = ({ posts }) =>
-  posts.map((p, i) => <Feed post={p} key={i} />);
+const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
+  posts.map((p) => <Feed post={p} key={p.id} deleteThePost={deleteThePost} />);
 
-const DisplayFeed = ({ posts }) => {
+const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
   return (
     <div>
       <h1>Feed</h1>
-      <CreateFeed posts={posts} />
+      <CreateFeed posts={posts} deleteThePost={deleteThePost} />
     </div>
   );
 };
 
 const App = () => {
-  const dummyPosts: Post[] = [{ title: "sanket", body: "Step Intern" }];
-  const [posts, setPosts] = useState(dummyPosts);
+  const dummyPosts: Post[] = [{ title: "sanket", body: "Step Intern", id: 1 }];
+  const [posts, dispatch] = useReducer(Reducer, dummyPosts);
+
+  useEffect(() => {
+    fetch("https://localhost:8000/load-post")
+      .then((x) => x.json())
+      .then((x) => dispatch(x));
+  }, []);
 
   return (
     <div>
-      <DisplayForm saveThePost={setPosts} posts={posts} />
-      <DisplayFeed posts={posts} />
+      <DisplayForm saveThePost={dispatch} posts={posts} />
+      <DisplayFeed deleteThePost={dispatch} posts={posts} />
     </div>
   );
 };
