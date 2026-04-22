@@ -4,22 +4,27 @@ export class PostStore {
 
   constructor(posts) {
     this.#posts = posts;
-    this.#nextId = 1;
+    this.#nextId = 2;
   }
 
   addPost(title, body) {
-    this.#posts.push({ title, body, id: this.#nextId++ });
+    this.#posts.unshift({ title, body, id: this.#nextId++ });
+    console.log({ posts: this.#posts });
 
+    console.log(this.#posts[0].id);
     return this.#nextId - 1;
   }
 
   deletePost(id) {
     this.#posts.filter((post) => post.id !== id);
+    console.log({ posts: this.#posts });
 
     return id;
   }
 
   loadPosts() {
+    console.log({ posts: this.#posts });
+
     return this.#posts;
   }
 }

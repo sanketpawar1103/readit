@@ -14,7 +14,7 @@ export const createApp = (store) => {
   app.use(cors({ origin: "http://localhost:5173" }));
   app.get("/load-post", loadPosts);
   app.post("/add-post", addPost);
-  app.post("/add-post", deletePost);
+  app.post("/delete-post", deletePost);
 
   return app;
 };

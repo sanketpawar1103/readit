@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from "react";
-import { type Action, type Post, Reducer } from "./reducer";
+import { type Action, type Post, Reducer } from "./reducer.ts";
 
 type Feed = {
   post: Post;
@@ -22,8 +22,11 @@ type FeedProps = {
   deleteThePost: (action: Action) => void;
 };
 
-const fetPost = (body: { title: string; body: string }) =>
-  fetch("http://localhost:8000/add-post", {
+const fetchPost = (
+  endPoint: string,
+  body: { title: string; body: string } | { id: number },
+) =>
+  fetch(`http://localhost:8000/${endPoint}`, {
     method: "post",
     body: JSON.stringify(body),
   })
@@ -32,7 +35,7 @@ const fetPost = (body: { title: string; body: string }) =>
 
 const FormTitle = () => <h1>Create Post</h1>;
 
-const DisplayForm = ({ saveThePost, posts }: DisplayFormProps) => {
+const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
@@ -40,9 +43,8 @@ const DisplayForm = ({ saveThePost, posts }: DisplayFormProps) => {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        // const id = posts[posts.length - 1].id + 1 || 1;
-        const id: number = await fetPost({ title, body });
-        console.log(id);
+        const id: number = await fetchPost("add-post", { title, body });
+        console.log({ id });
         saveThePost({ act: "add-post", title, id, body });
       }}
     >
@@ -75,7 +77,8 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
       <h2>{post.title}</h2>
       <p>{post.body}</p>
       <button
-        onClick={() => {
+        onClick={async () => {
+          await fetchPost("delete-post", { id: post.id });
           deleteThePost({ act: "delete-post", post });
         }}
       >
@@ -86,10 +89,13 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
   );
 };
 
-const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
-  posts.map((p) => <Feed post={p} key={p.id} deleteThePost={deleteThePost} />);
-
+const CreateFeed = ({ posts, deleteThePost }: DeletePost) => {
+  return posts.map((p) => (
+    <Feed post={p} key={p.id} deleteThePost={deleteThePost} />
+  ));
+};
 const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
+  console.log(posts.map((p) => p.id));
   return (
     <div>
       <h1>Feed</h1>
@@ -98,14 +104,15 @@ const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
   );
 };
 
+const dummyPosts: Post[] = [{ title: "sanket", body: "Step Intern", id: 1 }];
+
 const App = () => {
-  const dummyPosts: Post[] = [{ title: "sanket", body: "Step Intern", id: 1 }];
   const [posts, dispatch] = useReducer(Reducer, dummyPosts);
 
   useEffect(() => {
-    fetch("https://localhost:8000/load-post")
+    fetch("http://localhost:8000/load-post")
       .then((x) => x.json())
-      .then((x) => dispatch(x));
+      .then((x) => dispatch({ act: "", posts: x }));
   }, []);
 
   return (

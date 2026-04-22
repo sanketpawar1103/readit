@@ -1,6 +1,5 @@
 export const loadPosts = (c) => {
   const instance = c.get("store");
-  console.log("Inside the handler");
 
   return c.json(instance.loadPosts());
 };
@@ -16,5 +15,5 @@ export const deletePost = async (c) => {
   const instance = c.get("store");
   const { id } = await c.req.json();
 
-  return c.json(instance.addPost(title, body));
+  return c.json(instance.deletePost(id));
 };

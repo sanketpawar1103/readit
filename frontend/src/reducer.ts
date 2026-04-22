@@ -19,6 +19,6 @@ export const Reducer = (posts: Post[], action: Action): Post[] => {
       return posts.filter((p) => p.id !== action.post.id);
 
     default:
-      return posts;
+      return action.posts;
   }
 };
