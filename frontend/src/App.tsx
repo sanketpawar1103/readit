@@ -1,39 +1,49 @@
 import { useState } from "react";
 
+type Post = {
+  title: string;
+  body: string;
+};
+
 const FormTitle = () => <h1>Create Post</h1>;
 
-const FormData = () => (
-  <>
-    <p>Title</p>
-    <input type="text" placeholder="Enter a title..." name="title" />
-    <p>Body</p>
-    <textarea
-      name="body"
-      placeholder="Write your post..."
-      rows={5}
-      cols={50}
+const DisplayForm = ({ saveThePost, posts }) => {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        saveThePost([{ title, body }, ...posts]);
+      }}
     >
-    </textarea>
-    <button type="submit">Post</button>
-  </>
-);
+      <FormTitle />
+      <p>Title</p>
+      <input
+        type="text"
+        placeholder="Enter a title..."
+        name="title"
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <p>Body</p>
+      <textarea
+        name="body"
+        placeholder="Write your post..."
+        rows={5}
+        cols={50}
+        onChange={(e) => setBody(e.target.value)}
+      >
+      </textarea>
+      <button type="submit">Post</button>
+    </form>
+  );
+};
 
-const DisplayForm = ({ saveThePost, posts }) => (
-  <form
-    onSubmit={(e) => {
-      e.preventDefault();
-      saveThePost([...posts, { name: "sanket", body: "StepIntern" }]);
-    }}
-  >
-    <FormTitle />
-    <FormData />
-  </form>
-);
-
-const Feed = ({ post }: { name: string; body: string }) => {
+const Feed = ({ post }) => {
   return (
     <>
-      <h2>{post.name}</h2>
+      <h2>{post.title}</h2>
       <p>{post.body}</p>
     </>
   );
@@ -52,7 +62,7 @@ const DisplayFeed = ({ posts }) => {
 };
 
 const App = () => {
-  const dummyPosts = [{ name: "sanket", body: "Step Intern" }];
+  const dummyPosts: Post[] = [{ title: "sanket", body: "Step Intern" }];
   const [posts, setPosts] = useState(dummyPosts);
 
   return (
