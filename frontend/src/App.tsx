@@ -24,7 +24,7 @@ type FeedProps = {
 
 const fetchPost = (
   endPoint: string,
-  body: { title: string; body: string } | { id: number },
+  body: { title: string; body: string } | { id: string },
 ) =>
   fetch(`http://localhost:8000/${endPoint}`, {
     method: "post",
@@ -43,8 +43,7 @@ const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        const id: number = await fetchPost("add-post", { title, body });
-        console.log({ id }, "printing");
+        const id: string = await fetchPost("add-post", { title, body });
         saveThePost({ act: "add-post", title, id, body });
       }}
     >
@@ -77,8 +76,10 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
       <h2>{post.title}</h2>
       <p>{post.body}</p>
       <button
+        type="button"
         onClick={async () => {
-          await fetchPost("delete-post", { id: post.id });
+          console.log({ post });
+          await fetchPost("delete-post", { id: post._id });
           deleteThePost({ act: "delete-post", post });
         }}
       >
@@ -89,12 +90,9 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
   );
 };
 
-const CreateFeed = ({ posts, deleteThePost }: DeletePost) => {
-  posts.map(console.log);
-  return posts.map((p) => (
-    <Feed post={p} key={p.id} deleteThePost={deleteThePost} />
-  ));
-};
+const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
+  posts.map((p) => <Feed post={p} key={p.id} deleteThePost={deleteThePost} />);
+
 const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
   return (
     <div>
@@ -104,10 +102,8 @@ const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
   );
 };
 
-const dummyPosts: Post[] = [{ title: "sanket", body: "Step Intern", id: 1 }];
-
 const App = () => {
-  const [posts, dispatch] = useReducer(Reducer, dummyPosts);
+  const [posts, dispatch] = useReducer(Reducer, []);
 
   useEffect(() => {
     fetch("http://localhost:8000/load-post")

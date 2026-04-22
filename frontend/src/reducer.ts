@@ -1,18 +1,19 @@
 export type Post = {
   title: string;
   body: string;
-  id: number;
+  _id: string;
 };
 
 export type Action =
-  | { act: "add-post"; title: string; id: number; body: string }
-  | { act: "delete-post"; post: Post };
+  | { act: "add-post"; title: string; id: string; body: string }
+  | { act: "delete-post"; post: Post }
+  | { act: ""; posts: Post[] };
 
-export const Reducer = (posts: Post[], action: Action): Post[] => {
+export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
   switch (action.act) {
     case "add-post": {
       return [
-        { title: action.title, body: action.body, id: action.id },
+        { title: action.title, body: action.body, _id: action.id },
         ...posts,
       ];
     }
