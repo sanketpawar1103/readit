@@ -7,8 +7,9 @@ export const loadPosts = (c) => {
 export const addPost = async (c) => {
   const instance = c.get("store");
   const { title, body } = await c.req.json();
+  const id = instance.addPost(title, body);
 
-  return c.json(instance.addPost(title, body));
+  return c.json(id);
 };
 
 export const deletePost = async (c) => {

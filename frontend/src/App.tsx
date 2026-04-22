@@ -44,7 +44,7 @@ const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
       onSubmit={async (e) => {
         e.preventDefault();
         const id: number = await fetchPost("add-post", { title, body });
-        console.log({ id });
+        console.log({ id }, "printing");
         saveThePost({ act: "add-post", title, id, body });
       }}
     >
@@ -90,12 +90,12 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
 };
 
 const CreateFeed = ({ posts, deleteThePost }: DeletePost) => {
+  posts.map(console.log);
   return posts.map((p) => (
     <Feed post={p} key={p.id} deleteThePost={deleteThePost} />
   ));
 };
 const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => {
-  console.log(posts.map((p) => p.id));
   return (
     <div>
       <h1>Feed</h1>

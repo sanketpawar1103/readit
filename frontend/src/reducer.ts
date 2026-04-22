@@ -11,8 +11,10 @@ export type Action =
 export const Reducer = (posts: Post[], action: Action): Post[] => {
   switch (action.act) {
     case "add-post": {
-      const id = posts[posts.length - 1].id + 1 || 1;
-      return [{ title: action.title, body: action.body, id }, ...posts];
+      return [
+        { title: action.title, body: action.body, id: action.id },
+        ...posts,
+      ];
     }
 
     case "delete-post":
