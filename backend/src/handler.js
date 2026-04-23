@@ -8,15 +8,15 @@ export const loadPosts = async (c) => {
 export const addPost = async (c) => {
   const instance = c.get("store");
   const { title, body } = await c.req.json();
-  const id = await instance.addPost(title, body);
+  const postDetails = await instance.addPost(title, body);
 
-  return c.json(id);
+  return c.json(postDetails);
 };
 
 export const deletePost = async (c) => {
   const instance = c.get("store");
   const { id } = await c.req.json();
-  const deletedId = await instance.deletePost(id);
+  const { deletedId } = await instance.deletePost(id);
 
-  return c.json(deletedId);
+  return c.json({ deletedId });
 };

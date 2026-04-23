@@ -1,9 +1,10 @@
 import { type SubmitEvent, useEffect, useReducer, useState } from "react";
 import { type Action, type Post, Reducer } from "./reducer.ts";
+import { format } from "date-fns/format";
 
 type Dispatch = (action: Action) => void;
 
-type id = string;
+type Res = { user: string; date: Date; id: string };
 
 type Body = { title: string; body: string } | { id: string };
 
@@ -33,8 +34,8 @@ const fetchPost = (endPoint: string, body: Body) =>
     method: "post",
     body: JSON.stringify(body),
   })
-    .then((x) => x.json())
-    .then((x) => x);
+    .then((res) => res.json())
+    .then((res) => res);
 
 const FormTitle = () => <h1>Create Post</h1>;
 
@@ -74,8 +75,8 @@ const AddPost = async (
   e.preventDefault();
   const body = { title, body: desc };
 
-  const _id: id = await fetchPost("add-post", body);
-  saveThePost({ act: "add-post", title, _id, body: desc });
+  const { id, user, date }: Res = await fetchPost("add-post", body);
+  saveThePost({ act: "add-post", id, ...body, user, date });
 };
 
 const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
@@ -98,7 +99,7 @@ const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
 
 const confirmTheDelete = async (post: Post, deleteThePost: Dispatch) => {
   const confirmMsg = `Do you want to delete post: ${post.title}`;
-  const body = { id: post._id };
+  const body = { id: post.id };
 
   if (confirm(confirmMsg)) {
     await fetchPost("delete-post", body);
@@ -123,7 +124,9 @@ const DeleteButton = ({ post, deleteThePost }) => (
 const Feed = ({ post, deleteThePost }: FeedProps) => {
   return (
     <>
-      <h2>{post.title}</h2>
+      <h2>{post.user}</h2>
+      <p>{format(post.date, "MMM d, yyyy • hh:mm a")}</p>
+      <h1>{post.title}</h1>
       <p>{post.body}</p>
       <DeleteButton post={post} deleteThePost={deleteThePost} />
     </>
@@ -131,8 +134,8 @@ const Feed = ({ post, deleteThePost }: FeedProps) => {
 };
 
 const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
-  posts.map((post) => (
-    <Feed post={post} key={post._id} deleteThePost={deleteThePost} />
+  posts.map((post, i) => (
+    <Feed post={post} key={i} deleteThePost={deleteThePost} />
   ));
 
 const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => (

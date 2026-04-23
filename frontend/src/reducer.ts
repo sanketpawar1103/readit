@@ -1,25 +1,41 @@
+import { format } from "date-fns";
+
 export type Post = {
   title: string;
   body: string;
-  _id: string;
+  id: string;
+  user: string;
+  date: string;
 };
 
 export type Action =
-  | { act: "add-post"; title: string; _id: string; body: string }
+  | {
+    act: "add-post";
+    title: string;
+    id: string;
+    body: string;
+    user: string;
+    date: Date;
+  }
   | { act: "delete-post"; post: Post }
   | { act: ""; posts: Post[] };
 
 export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
   switch (action.act) {
     case "add-post": {
-      return [
-        { title: action.title, body: action.body, _id: action._id },
-        ...posts,
-      ];
+      const newPost = {
+        title: action.title,
+        body: action.body,
+        id: action.id,
+        date: format(action.date, "MM/dd/yyyy"),
+        user: action.user,
+      };
+
+      return [newPost, ...posts];
     }
 
     case "delete-post":
-      return posts.filter((p) => p._id !== action.post._id);
+      return posts.filter(({ id }) => id !== action.post.id);
 
     default:
       return action.posts;

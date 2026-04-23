@@ -8,18 +8,20 @@ export class PostStoreDB {
   }
 
   async addPost(title: string, body: string) {
-    const result = await this.#posts.insertOne({ title, body });
+    const date = Date.now();
+    const user = "Sanket Pawar";
+    const result = await this.#posts.insertOne({ title, body, user, date });
 
-    return result.insertedId.toString();
+    return { id: result.insertedId.toString(), date, user };
   }
 
   async deletePost(id: string) {
     await this.#posts.deleteOne({ _id: new ObjectId(id) });
 
-    return id;
+    return { id };
   }
 
   async loadPosts() {
-    return await this.#posts.find().toArray();
+    return (await this.#posts.find().toArray()).reverse();
   }
 }
