@@ -5,13 +5,14 @@ type Body =
 
 export const fetchPost = (endPoint: string, body: Body) =>
   fetch(`http://localhost:8000/${endPoint}`, {
-    method: "post",
+    method: "POST",
     body: JSON.stringify(body),
+    credentials: "include",
   })
     .then((res) => res.json())
     .then((res) => res);
 
 export const fetchGet = (endPoint: string) =>
-  fetch(`http://localhost:8000/${endPoint}`)
+  fetch(`http://localhost:8000/${endPoint}`, { credentials: "include" })
     .then((res) => res.json())
     .then((res) => res);

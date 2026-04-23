@@ -82,14 +82,12 @@ const Auth = ({ setter, isLoggedIn }) => {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          const { success } = await fetchPost("login", {
+          await fetchPost("login", {
             userName: name,
             password: pass,
           });
-          console.log(success);
-          if (success === true) {
-            setter(!isLoggedIn);
-          }
+
+          setter(!isLoggedIn);
         }}
       >
         <input

@@ -14,10 +14,30 @@ export class PostStoreDB {
     this.#users = db.collection("users");
   }
 
-  async addPost(title: string, body: string) {
+  async loginUser({ userName, password }: Credentials) {
+    const [isExist] = await this.#users.find({ user: userName }).toArray();
+
+    if (isExist !== undefined) {
+      return { id: isExist._id };
+    }
+
+    const result = await this.#users.insertOne({ user: userName, password });
+    return { id: result.insertedId.toString() };
+  }
+
+  async #getUserData(userId: string) {
+    const [result] = await this.#users
+      .find({ _id: new ObjectId(userId) })
+      .toArray();
+
+    return result;
+  }
+
+  async addPost(title: string, body: string, userId: string) {
+    const { user } = await this.#getUserData(userId);
     const date = Date.now();
-    const user = "Sanket Pawar";
-    const result = await this.#posts.insertOne({ title, body, user, date });
+    const row = { title, body, user, date, userId };
+    const result = await this.#posts.insertOne(row);
 
     return { id: result.insertedId.toString(), date, user };
   }
@@ -28,7 +48,11 @@ export class PostStoreDB {
     return { id };
   }
 
-  async loadPosts() {
-    return (await this.#posts.find().toArray()).reverse();
+  async #getAllPostsOfUser(userId: string) {
+    return (await this.#posts.find({ userId: userId }).toArray()).reverse();
+  }
+
+  async loadPosts(userId: string) {
+    return await this.#getAllPostsOfUser(userId);
   }
 }
