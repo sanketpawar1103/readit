@@ -1,7 +1,7 @@
 import { format } from "date-fns/format";
 import { type Dispatch } from "./App.tsx";
 import { fetchPost } from "./Api.tsx";
-import type { Action, Post } from "./reducer.ts";
+import type { Action, Post } from "./Reducer.ts";
 
 type Feed = {
   post: Post;
@@ -21,7 +21,7 @@ type FeedProps = {
 
 const confirmTheDelete = async (post: Post, deleteThePost: Dispatch) => {
   const confirmMsg = `Do you want to delete post: ${post.title}`;
-  const body = { id: post.id };
+  const body = { id: post._id };
 
   if (confirm(confirmMsg)) {
     await fetchPost("delete-post", body);

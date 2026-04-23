@@ -1,5 +1,5 @@
 import { type SubmitEvent, useEffect, useReducer, useState } from "react";
-import { type Action, type Post, Reducer } from "./reducer.ts";
+import { type Action, type Post, Reducer } from "./Reducer.ts";
 import { DisplayFeed } from "./Feed.tsx";
 import { fetchGet, fetchPost } from "./Api.tsx";
 
@@ -51,7 +51,7 @@ const AddPost = async (
   const body = { title, body: desc };
 
   const { id, user, date }: Res = await fetchPost("add-post", body);
-  saveThePost({ act: "add-post", id, ...body, user, date });
+  saveThePost({ act: "add-post", _id: id, ...body, user, date });
 };
 
 const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
@@ -72,7 +72,7 @@ const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
   );
 };
 
-const Auth = ({ setter, isLoggedIn }) => {
+const Auth = ({ setter }) => {
   const [name, setName] = useState("");
   const [pass, setPass] = useState("");
 
@@ -87,7 +87,7 @@ const Auth = ({ setter, isLoggedIn }) => {
             password: pass,
           });
 
-          setter(!isLoggedIn);
+          setter(true);
         }}
       >
         <input
@@ -112,7 +112,7 @@ const Auth = ({ setter, isLoggedIn }) => {
 };
 const App = () => {
   const [posts, dispatch] = useReducer(Reducer, []);
-  const [isLoggedIn, setLoggedIn] = useState(false);
+  const [_isLoggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     fetchGet("load-post").then((res) => dispatch({ act: "", posts: res }));
@@ -120,14 +120,15 @@ const App = () => {
 
   return (
     <div>
-      {isLoggedIn
+      {_isLoggedIn
         ? (
           <>
+            <SearchBar />
             <DisplayForm saveThePost={dispatch} posts={posts} />
             <DisplayFeed deleteThePost={dispatch} posts={posts} />
           </>
         )
-        : <Auth isLoggedIn={isLoggedIn} setter={setLoggedIn} />}
+        : <Auth setter={setLoggedIn} />}
     </div>
   );
 };
