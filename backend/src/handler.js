@@ -20,3 +20,10 @@ export const deletePost = async (c) => {
 
   return c.json({ deletedId });
 };
+
+export const loginUser = async (c) => {
+  const { userName, password } = await c.req.json();
+  console.log({ userName, password });
+
+  return c.json({ success: true });
+};

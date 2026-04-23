@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
-import { addPost, deletePost, loadPosts } from "./handler.js";
+import { addPost, deletePost, loadPosts, loginUser } from "./handler.js";
 import { PostStoreDB } from "./post_store_db.ts";
 
 type AppVariables = {
@@ -18,6 +18,7 @@ export const createApp = (store: PostStoreDB) => {
   app.use(logger());
   app.use(cors({ origin: "http://127.0.0.1:5173" }));
   app.get("/load-post", loadPosts);
+  app.post("/login", loginUser);
   app.post("/add-post", addPost);
   app.post("/delete-post", deletePost);
 

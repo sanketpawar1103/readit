@@ -72,8 +72,49 @@ const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
   );
 };
 
+const Auth = ({ setter, isLoggedIn }) => {
+  const [name, setName] = useState("");
+  const [pass, setPass] = useState("");
+
+  return (
+    <>
+      <h1>Login</h1>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const { success } = await fetchPost("login", {
+            userName: name,
+            password: pass,
+          });
+          console.log(success);
+          if (success === true) {
+            setter(!isLoggedIn);
+          }
+        }}
+      >
+        <input
+          type="text"
+          name="userName"
+          required
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+        />
+        <input
+          type="password"
+          required
+          onChange={(e) => {
+            setPass(e.target.value);
+          }}
+        />
+        <button type="submit">Login</button>
+      </form>
+    </>
+  );
+};
 const App = () => {
   const [posts, dispatch] = useReducer(Reducer, []);
+  const [isLoggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     fetchGet("load-post").then((res) => dispatch({ act: "", posts: res }));
@@ -81,8 +122,14 @@ const App = () => {
 
   return (
     <div>
-      <DisplayForm saveThePost={dispatch} posts={posts} />
-      <DisplayFeed deleteThePost={dispatch} posts={posts} />
+      {isLoggedIn
+        ? (
+          <>
+            <DisplayForm saveThePost={dispatch} posts={posts} />
+            <DisplayFeed deleteThePost={dispatch} posts={posts} />
+          </>
+        )
+        : <Auth isLoggedIn={isLoggedIn} setter={setLoggedIn} />}
     </div>
   );
 };

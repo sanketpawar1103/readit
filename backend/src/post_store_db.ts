@@ -1,10 +1,17 @@
 import { Db, ObjectId } from "mongodb";
 
+type Credentials = {
+  userName: string;
+  password: string;
+};
+
 export class PostStoreDB {
   #posts;
+  #users;
 
   constructor(db: Db) {
     this.#posts = db.collection("posts");
+    this.#users = db.collection("users");
   }
 
   async addPost(title: string, body: string) {
