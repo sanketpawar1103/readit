@@ -17,7 +17,9 @@ const DisplaySuggestions = ({ search }: { search: string }) => {
         <button
           type="button"
           onClick={(e) => {
-            e.target.innerText = isSubscribed ? "Unsubscribe" : "Subscribe";
+            (e.target as HTMLElement).innerText = isSubscribed
+              ? "Unsubscribe"
+              : "Subscribe";
             isSubscribed = !isSubscribed;
           }}
         >
