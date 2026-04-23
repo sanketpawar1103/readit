@@ -59,21 +59,9 @@ export class PostStoreDB {
   }
 
   async loadPosts(userId: string) {
-    return await this.#getAllPostsOfUser(userId);
+    const usersPost = await this.#getAllPostsOfUser(userId);
+    const users = this.#users.find().toArray();
+
+    return { usersPost, users };
   }
 }
-
-// const pids = (await this.#posts.find().toArray()).map((_id) => _id);
-// const uids = (await this.#users.find().toArray()).map((_id) => _id);
-// console.log({ pids, uids });
-// pids.map(
-//   async ({ _id }) =>
-//     await this.#posts.deleteOne({ _id: new ObjectId(_id) }),
-// );
-// uids.map(
-//   async ({ _id }) =>
-//     await this.#users.deleteOne({ _id: new ObjectId(_id) }),
-// );
-// const p = (await this.#posts.find().toArray()).map((_id) => _id);
-// const u = (await this.#users.find().toArray()).map((_id) => _id);
-// console.log({ p, u });

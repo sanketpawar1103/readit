@@ -23,8 +23,6 @@ export type Action =
 export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
   switch (action.act) {
     case "add-post": {
-      console.log("Adds the post");
-
       const newPost = {
         title: action.title,
         body: action.body,
@@ -37,14 +35,10 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
     }
 
     case "delete-post": {
-      console.log("deletes the post");
       const result = posts.filter(({ _id }) => _id !== action.post._id);
-      console.log(posts.map(console.log).length);
-      console.log(result.map(console.log).length);
       return result;
     }
     default: {
-      console.log("calls fetch");
       return action.posts;
     }
   }

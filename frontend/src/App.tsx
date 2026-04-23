@@ -2,6 +2,7 @@ import { type SubmitEvent, useEffect, useReducer, useState } from "react";
 import { type Action, type Post, Reducer } from "./Reducer.ts";
 import { DisplayFeed } from "./Feed.tsx";
 import { fetchGet, fetchPost } from "./Api.tsx";
+import { SearchBar } from "./SearchBar.tsx";
 
 export type Dispatch = (action: Action) => void;
 
@@ -115,7 +116,9 @@ const App = () => {
   const [_isLoggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    fetchGet("load-post").then((res) => dispatch({ act: "", posts: res }));
+    fetchGet("load-post").then((res) => {
+      dispatch({ act: "", posts: res.usersPost });
+    });
   }, []);
 
   return (
