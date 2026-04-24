@@ -43,10 +43,37 @@ export const loginUser = async (c: Context) => {
   return c.json({ success: true });
 };
 
+type Matches = {
+  _id: string;
+  user: string;
+  password: string;
+  subscribed: string[];
+};
+
+const mapSubscribers = (subscriptionList: string[], matches: Matches[]) => {
+  return matches.map(({ _id, user }) => ({
+    user,
+    _id,
+    isSubscribed: subscriptionList.includes(_id),
+  }));
+};
+
 export const searchUsers = async (c: Context) => {
   const instance = c.get("store");
   const { initials } = await c.req.json();
   const match = await instance.searchUsers(initials);
-  console.log({ initials, match });
-  return c.json(match);
+  const userId = getCookie(c, "userId");
+  const subscriptionList = await instance.getUserData(userId);
+  const result = mapSubscribers(subscriptionList.subscribed, match.matches);
+
+  return c.json(result);
+};
+
+export const toggleSubscribe = async (c: Context) => {
+  const instance = c.get("store");
+  const { id } = await c.req.json();
+  const userId = getCookie(c, "userId");
+  const posts = await instance.toggleSubscribe(id, userId);
+
+  return c.json(posts);
 };

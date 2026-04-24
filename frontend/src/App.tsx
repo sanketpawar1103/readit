@@ -17,7 +17,7 @@ const LoadPage = ({ dispatch, posts }: LoadPageAttr) => {
       {_isLoggedIn
         ? (
           <>
-            <SearchBar />
+            <SearchBar dispatch={dispatch} posts={posts} />
             <DisplayForm saveThePost={dispatch} posts={posts} />
             <DisplayFeed deleteThePost={dispatch} posts={posts} />
           </>

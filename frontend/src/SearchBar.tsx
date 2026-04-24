@@ -1,23 +1,32 @@
 import { useState } from "react";
 import { fetchPost } from "./Api.tsx";
 
-const DisplaySuggestions = ({ suggestions }) => {
-  return suggestions.map(({ user, isSubscribed }, i: number) => (
-    <div key={i}>
-      {user}
-      <button
-        type="button"
-        onClick={(e) => {
-          (e.target as HTMLElement).innerText = isSubscribed
-            ? "Unsubscribe"
-            : "Subscribe";
-          isSubscribed = !isSubscribed;
-        }}
-      >
-        subscribe
-      </button>
-    </div>
-  ));
+const DisplaySuggestions = ({ suggestions, dispatch }) => {
+  return suggestions.map(({ user, _id, isSubscribed }, i: number) => {
+    return (
+      <div key={i}>
+        {user}
+        <button
+          type="button"
+          onClick={async (e) => {
+            e.preventDefault();
+            await fetchPost("toggle-subscribe", {
+              id: _id,
+            }).then((res) => {
+              dispatch({ act: "render-posts", posts: res.posts });
+            });
+
+            isSubscribed = !isSubscribed;
+            (e.target as HTMLElement).innerText = isSubscribed
+              ? "Unsubscribe"
+              : "Subscribe";
+          }}
+        >
+          {isSubscribed ? "Unsubscribe" : "Subscribe"}
+        </button>
+      </div>
+    );
+  });
 };
 
 const SearchHead = () => <h1>Search Users</h1>;
@@ -38,7 +47,6 @@ const SearchBtn = ({ setSuggestions, initials }) => (
       e.preventDefault();
       if (initials.trim().length > 0) {
         await fetchPost("search-users", { initials }).then((res) => {
-          console.log({ res });
           setSuggestions(res);
         });
       } else {
@@ -50,13 +58,13 @@ const SearchBtn = ({ setSuggestions, initials }) => (
   </span>
 );
 
-const SearchList = ({ suggestions }) => (
+const SearchList = ({ suggestions, dispatch }) => (
   <div>
-    <DisplaySuggestions suggestions={suggestions} />
+    <DisplaySuggestions suggestions={suggestions} dispatch={dispatch} />
   </div>
 );
 
-export const SearchBar = () => {
+export const SearchBar = ({ dispatch }) => {
   const [search, setName] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
@@ -65,7 +73,7 @@ export const SearchBar = () => {
       <SearchHead />
       <SearchBarInput setName={setName} />
       <SearchBtn initials={search} setSuggestions={setSuggestions} />
-      <SearchList suggestions={suggestions} />
+      <SearchList suggestions={suggestions} dispatch={dispatch} />
     </>
   );
 };

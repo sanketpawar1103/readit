@@ -18,7 +18,8 @@ export type Action =
     date: Date;
   }
   | { act: "delete-post"; post: Post }
-  | { act: ""; posts: Post[] };
+  | { act: ""; posts: Post[] }
+  | { act: "render-posts"; posts: Post[] };
 
 export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
   switch (action.act) {
@@ -38,6 +39,11 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
       const result = posts.filter(({ _id }) => _id !== action.post._id);
       return result;
     }
+
+    case "render-posts": {
+      return [...posts, ...action.posts];
+    }
+
     default: {
       return action.posts;
     }

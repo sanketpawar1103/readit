@@ -2,7 +2,8 @@ type Body =
   | { title: string; body: string }
   | { id: string }
   | { userName: string; password: string }
-  | { initials: string };
+  | { initials: string }
+  | { id: string; isSubscribed: boolean };
 
 export const fetchPost = (endPoint: string, body: Body) =>
   fetch(`http://localhost:8000/${endPoint}`, {

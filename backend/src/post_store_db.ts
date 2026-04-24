@@ -1,5 +1,4 @@
 import { Db, ObjectId } from "mongodb";
-import { match } from "node:assert";
 
 type Credentials = {
   userName: string;
@@ -31,7 +30,7 @@ export class PostStoreDB {
     return { id: result.insertedId.toString() };
   }
 
-  async #getUserData(userId: string) {
+  async getUserData(userId: string) {
     const [result] = await this.#users
       .find({ _id: new ObjectId(userId) })
       .toArray();
@@ -40,7 +39,7 @@ export class PostStoreDB {
   }
 
   async addPost(title: string, body: string, userId: string) {
-    const { user } = await this.#getUserData(userId);
+    const { user } = await this.getUserData(userId);
     const date = Date.now();
     const row = { title, body, user, date, userId };
     const result = await this.#posts.insertOne(row);
@@ -71,9 +70,28 @@ export class PostStoreDB {
       .toArray();
 
     return {
-      matches: matches.map(({ _id, user }) => {
-        return { _id, user };
+      matches: matches.map(({ _id, user, subscribed }) => {
+        return { _id: _id.toString(), user, subscribed };
       }),
     };
+  }
+
+  async toggleSubscribe(id: string, userId: string) {
+    const { subscribed } = await this.getUserData(userId);
+    if (!subscribed.includes(id)) {
+      subscribed.push(id);
+
+      await this.#users.updateOne(
+        { _id: new ObjectId(userId) },
+        { $set: { subscribed: subscribed } },
+      );
+
+      return { posts: await this.#posts.find({ userId: id }).toArray() };
+    }
+
+    await this.#users.updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { subscribed: id } },
+    );
   }
 }

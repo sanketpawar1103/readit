@@ -7,6 +7,7 @@ import {
   loadPosts,
   loginUser,
   searchUsers,
+  toggleSubscribe,
 } from "./handler.ts";
 import { PostStoreDB } from "./post_store_db.ts";
 
@@ -28,6 +29,7 @@ export const createApp = (store: PostStoreDB) => {
   app.post("/add-post", addPost);
   app.post("/delete-post", deletePost);
   app.post("/search-users", searchUsers);
+  app.post("/toggle-subscribe", toggleSubscribe);
 
   return app;
 };
