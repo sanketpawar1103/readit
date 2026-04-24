@@ -1,7 +1,13 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
-import { addPost, deletePost, loadPosts, loginUser } from "./handler.ts";
+import {
+  addPost,
+  deletePost,
+  loadPosts,
+  loginUser,
+  searchUsers,
+} from "./handler.ts";
 import { PostStoreDB } from "./post_store_db.ts";
 
 type AppVariables = {
@@ -21,6 +27,7 @@ export const createApp = (store: PostStoreDB) => {
   app.post("/login", loginUser);
   app.post("/add-post", addPost);
   app.post("/delete-post", deletePost);
+  app.post("/search-users", searchUsers);
 
   return app;
 };

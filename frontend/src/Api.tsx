@@ -1,7 +1,8 @@
 type Body =
   | { title: string; body: string }
   | { id: string }
-  | { userName: string; password: string };
+  | { userName: string; password: string }
+  | { initials: string };
 
 export const fetchPost = (endPoint: string, body: Body) =>
   fetch(`http://localhost:8000/${endPoint}`, {

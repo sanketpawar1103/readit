@@ -7,8 +7,9 @@ import { DisplayForm } from "./CreatePost.tsx";
 import { Auth } from "./Authentication.tsx";
 
 export type Dispatch = (action: Action) => void;
+type LoadPageAttr = { dispatch: Dispatch; posts: Post[] };
 
-const LoadPage = (dispatch: Dispatch, posts: Post[]) => {
+const LoadPage = ({ dispatch, posts }: LoadPageAttr) => {
   const [_isLoggedIn, setLoggedIn] = useState(false);
 
   return (
@@ -35,7 +36,7 @@ const App = () => {
     });
   }, []);
 
-  return LoadPage(dispatch, posts);
+  return <LoadPage dispatch={dispatch} posts={posts} />;
 };
 
 export default App;

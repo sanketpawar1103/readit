@@ -1,4 +1,5 @@
 import { Db, ObjectId } from "mongodb";
+import { match } from "node:assert";
 
 type Credentials = {
   userName: string;
@@ -19,13 +20,12 @@ export class PostStoreDB {
       .find({ user: userName, password: password })
       .toArray();
 
-    if (isExist !== undefined) {
-      return { id: isExist._id };
-    }
+    if (isExist !== undefined) return { id: isExist._id };
 
     const result = await this.#users.insertOne({
       user: userName,
       password: password,
+      subscribed: [],
     });
 
     return { id: result.insertedId.toString() };
@@ -60,8 +60,20 @@ export class PostStoreDB {
 
   async loadPosts(userId: string) {
     const usersPost = await this.#getAllPostsOfUser(userId);
-    const users = this.#users.find().toArray();
+    const users = await this.#users.find().toArray();
 
     return { usersPost, users };
+  }
+
+  async searchUsers(initials: string) {
+    const matches = await this.#users
+      .find({ user: { $regex: "^" + initials, $options: "i" } })
+      .toArray();
+
+    return {
+      matches: matches.map(({ _id, user }) => {
+        return { _id, user };
+      }),
+    };
   }
 }

@@ -42,3 +42,11 @@ export const loginUser = async (c: Context) => {
 
   return c.json({ success: true });
 };
+
+export const searchUsers = async (c: Context) => {
+  const instance = c.get("store");
+  const { initials } = await c.req.json();
+  const match = await instance.searchUsers(initials);
+  console.log({ initials, match });
+  return c.json(match);
+};
