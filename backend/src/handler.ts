@@ -77,3 +77,12 @@ export const toggleSubscribe = async (c: Context) => {
 
   return c.json(posts);
 };
+
+export const toggleLike = async (c: Context) => {
+  const instance = c.get("store");
+  const { postId } = await c.req.json();
+  const userId = getCookie(c, "userId");
+
+  const likeCount = await instance.toggleLike(postId, userId);
+  return c.json(likeCount);
+};

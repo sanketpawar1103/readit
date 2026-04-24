@@ -22,7 +22,7 @@ export type Action =
   | { act: "delete-post"; post: Post }
   | { act: ""; posts: Post[] }
   | { act: "render-posts"; posts: Post[] }
-  | { act: "delete-posts"; id: string };
+  | { act: "remove-posts"; id: string };
 
 export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
   switch (action.act) {
@@ -47,7 +47,8 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
     case "render-posts": {
       return [...posts, ...action.posts];
     }
-    case "delete-posts": {
+
+    case "remove-posts": {
       const delPosts = posts.filter(({ userId }) => {
         return userId !== action.id;
       });

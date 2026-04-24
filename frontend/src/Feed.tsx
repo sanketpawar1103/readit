@@ -30,7 +30,7 @@ const confirmTheDelete = async (post: Post, deleteThePost: Dispatch) => {
 };
 
 export const DeleteButton = ({ post, deleteThePost }) => (
-  <>
+  <div className="post-btns" style={{ display: "flex" }}>
     <button
       type="button"
       onClick={async () => {
@@ -39,12 +39,22 @@ export const DeleteButton = ({ post, deleteThePost }) => (
     >
       Delete
     </button>
+    <button
+      type="button"
+      onClick={(e) => {
+        fetchPost("toggle-like", { postId: post._id }).then(
+          (res) => (e.target.innerText = `Likes ${res.likesCount}`),
+        );
+      }}
+    >
+      Likes {post.likes.length}
+    </button>
     <hr />
-  </>
+  </div>
 );
 
-export const Feed = ({ post, deleteThePost }: FeedProps) => {
-  return post
+export const Feed = ({ post, deleteThePost }: FeedProps) =>
+  post
     ? (
       <>
         <h2>{post.user}</h2>
@@ -60,14 +70,12 @@ export const Feed = ({ post, deleteThePost }: FeedProps) => {
       </>
     )
     : <></>;
-};
 
-export const CreateFeed = ({ posts, deleteThePost }: DeletePost) => {
-  console.log({ posts });
-  return posts.map((post, i) => (
+export const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
+  posts.map((post, i) => (
     <Feed post={post} key={i} deleteThePost={deleteThePost} />
   ));
-};
+
 export const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => (
   <div>
     <h1>Feed</h1>

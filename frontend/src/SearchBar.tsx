@@ -15,7 +15,7 @@ const DisplaySuggestions = ({ suggestions, dispatch }) => {
             }).then((res) => {
               if (res.posts) {
                 dispatch({ act: "render-posts", posts: res.posts });
-              } else dispatch({ act: "delete-posts", id: res.id });
+              } else dispatch({ act: "remove-posts", id: res.id });
             });
 
             (e.target as HTMLElement).innerText =

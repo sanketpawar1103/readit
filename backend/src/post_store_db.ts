@@ -41,10 +41,11 @@ export class PostStoreDB {
   async addPost(title: string, body: string, userId: string) {
     const { user } = await this.getUserData(userId);
     const date = Date.now();
-    const row = { title, body, user, date, userId };
+    const likes: string[] = [];
+    const row = { title, body, user, date, userId, likes };
     const result = await this.#posts.insertOne(row);
 
-    return { id: result.insertedId.toString(), date, user, userId };
+    return { id: result.insertedId.toString(), date, user, userId, likes };
   }
 
   async deletePost(id: string, userId: string) {
@@ -64,7 +65,6 @@ export class PostStoreDB {
       subscribed.map((id) => this.#getAllPostsOfUser(id)),
     );
 
-    console.log([...usersPost, ...otherPosts.flat(2)]);
     return { usersPost: [...usersPost, ...otherPosts.flat(2)] };
   }
 
@@ -83,26 +83,66 @@ export class PostStoreDB {
   async toggleSubscribe(id: string, userId: string) {
     const { subscribed } = await this.getUserData(userId);
     if (!subscribed.includes(id)) {
-      subscribed.push(id);
-
-      await this.#users.updateOne(
-        { _id: new ObjectId(userId) },
-        { $set: { subscribed: subscribed } },
-      );
+      await this.#addToSubscribe(subscribed, id, userId);
 
       return { posts: await this.#posts.find({ userId: id }).toArray() };
     }
 
+    await this.#unsubscribeUser(userId, id);
+
+    return { id };
+  }
+
+  async toggleLike(postId: string, userId: string) {
+    const [{ likes: postLikes }] = await this.#posts
+      .find({ _id: new ObjectId(postId) })
+      .toArray();
+
+    if (!postLikes.includes(userId)) {
+      await this.#addToLike(postLikes, postId, userId);
+    } else {
+      await this.#dislikePost(postId, userId);
+    }
+
+    const [{ likes }] = await this.#posts
+      .find({ _id: new ObjectId(postId) })
+      .toArray();
+
+    console.log(likes);
+
+    return { likesCount: likes.length };
+  }
+
+  async #unsubscribeUser(userId: string, id: string) {
     await this.#users.updateOne(
       { _id: new ObjectId(userId) },
       { $pull: { subscribed: id } },
     );
+  }
 
-    console.log(
-      "subscribe",
-      await this.#users.find({ _id: new ObjectId(userId) }).toArray(),
+  async #dislikePost(postId: string, userId: string) {
+    console.log(userId);
+    await this.#posts.updateOne(
+      { _id: new ObjectId(postId) },
+      { $pull: { likes: userId } },
     );
+  }
 
-    return { id };
+  async #addToSubscribe(subscribed: string[], id: string, userId: string) {
+    subscribed.push(id);
+
+    await this.#users.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { subscribed: subscribed } },
+    );
+  }
+
+  async #addToLike(likes: string[], postId: string, userId: string) {
+    likes.push(userId);
+
+    await this.#posts.updateOne(
+      { _id: new ObjectId(postId) },
+      { $set: { likes: likes } },
+    );
   }
 }

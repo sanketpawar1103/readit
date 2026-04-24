@@ -90,3 +90,13 @@ reflect the latest subscription(unsubscription). Subscription should show the
 subscribed user's posts and unsubscribe should remove those.
 
 The delete option should only show up on the user's own posts.
+
+# Phase 6
+
+# Likes
+
+- Each post can be liked.
+- Each post also shows how many likes it has received.
+- A liked post can be unliked
+- Your own post can be liked
+- You can't like a post multiple times.
