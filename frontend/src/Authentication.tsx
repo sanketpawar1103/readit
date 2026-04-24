@@ -17,7 +17,7 @@ const onFormSubmit = async (
 
   setter(true);
   fetchGet("load-post").then((res) => {
-    dispatch({ act: "", posts: res.usersPost });
+    dispatch({ act: "render-posts", posts: res.usersPost });
   });
 };
 

@@ -6,6 +6,7 @@ export type Post = {
   _id: string;
   user: string;
   date: string;
+  userId: string;
 };
 
 export type Action =
@@ -16,10 +17,12 @@ export type Action =
     body: string;
     user: string;
     date: Date;
+    userId: string;
   }
   | { act: "delete-post"; post: Post }
   | { act: ""; posts: Post[] }
-  | { act: "render-posts"; posts: Post[] };
+  | { act: "render-posts"; posts: Post[] }
+  | { act: "delete-posts"; id: string };
 
 export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
   switch (action.act) {
@@ -30,6 +33,7 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
         _id: action._id,
         date: format(action.date, "MM/dd/yyyy"),
         user: action.user,
+        userId: action.userId,
       };
 
       return [newPost, ...posts];
@@ -42,6 +46,13 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
 
     case "render-posts": {
       return [...posts, ...action.posts];
+    }
+    case "delete-posts": {
+      const delPosts = posts.filter(({ userId }) => {
+        return userId !== action.id;
+      });
+
+      return [...delPosts];
     }
 
     default: {

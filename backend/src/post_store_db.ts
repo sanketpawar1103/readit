@@ -44,7 +44,7 @@ export class PostStoreDB {
     const row = { title, body, user, date, userId };
     const result = await this.#posts.insertOne(row);
 
-    return { id: result.insertedId.toString(), date, user };
+    return { id: result.insertedId.toString(), date, user, userId };
   }
 
   async deletePost(id: string, userId: string) {
@@ -59,9 +59,13 @@ export class PostStoreDB {
 
   async loadPosts(userId: string) {
     const usersPost = await this.#getAllPostsOfUser(userId);
-    const users = await this.#users.find().toArray();
+    const { subscribed } = await this.getUserData(userId);
+    const otherPosts = await Promise.all(
+      subscribed.map((id) => this.#getAllPostsOfUser(id)),
+    );
 
-    return { usersPost, users };
+    console.log([...usersPost, ...otherPosts.flat(2)]);
+    return { usersPost: [...usersPost, ...otherPosts.flat(2)] };
   }
 
   async searchUsers(initials: string) {
@@ -93,5 +97,12 @@ export class PostStoreDB {
       { _id: new ObjectId(userId) },
       { $pull: { subscribed: id } },
     );
+
+    console.log(
+      "subscribe",
+      await this.#users.find({ _id: new ObjectId(userId) }).toArray(),
+    );
+
+    return { id };
   }
 }

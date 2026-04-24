@@ -3,7 +3,7 @@ import { fetchPost } from "./Api.tsx";
 import { type Action, type Post } from "./Reducer.ts";
 import { type Dispatch } from "./App.tsx";
 
-type Res = { user: string; date: Date; id: string };
+type Res = { user: string; date: Date; id: string; userId: string };
 
 type DisplayFormProps = {
   saveThePost: (action: Action) => void;
@@ -48,8 +48,8 @@ const AddPost = async (
   e.preventDefault();
   const body = { title, body: desc };
 
-  const { id, user, date }: Res = await fetchPost("add-post", body);
-  saveThePost({ act: "add-post", _id: id, ...body, user, date });
+  const { id, user, date, userId }: Res = await fetchPost("add-post", body);
+  saveThePost({ act: "add-post", _id: id, ...body, user, date, userId });
 };
 
 export const DisplayForm = ({ saveThePost }: DisplayFormProps) => {

@@ -13,13 +13,15 @@ const DisplaySuggestions = ({ suggestions, dispatch }) => {
             await fetchPost("toggle-subscribe", {
               id: _id,
             }).then((res) => {
-              dispatch({ act: "render-posts", posts: res.posts });
+              if (res.posts) {
+                dispatch({ act: "render-posts", posts: res.posts });
+              } else dispatch({ act: "delete-posts", id: res.id });
             });
 
-            isSubscribed = !isSubscribed;
-            (e.target as HTMLElement).innerText = isSubscribed
-              ? "Unsubscribe"
-              : "Subscribe";
+            (e.target as HTMLElement).innerText =
+              (e.target as HTMLElement).innerText === "Unsubscribe"
+                ? "Subscribe"
+                : "Unsubscribe";
           }}
         >
           {isSubscribed ? "Unsubscribe" : "Subscribe"}

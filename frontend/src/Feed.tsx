@@ -44,22 +44,30 @@ export const DeleteButton = ({ post, deleteThePost }) => (
 );
 
 export const Feed = ({ post, deleteThePost }: FeedProps) => {
-  return (
-    <>
-      <h2>{post.user}</h2>
-      <p>{format(post.date, "MMM d, yyyy • hh:mm a")}</p>
-      <h1>{post.title}</h1>
-      <p>{post.body}</p>
-      <DeleteButton post={post} deleteThePost={deleteThePost} />
-    </>
-  );
+  return post
+    ? (
+      <>
+        <h2>{post.user}</h2>
+        <p>
+          {format(
+            new Date(post.date || "1776964218892"),
+            "MMM d, yyyy • hh:mm a",
+          )}
+        </p>
+        <h1>{post.title}</h1>
+        <p>{post.body}</p>
+        <DeleteButton post={post} deleteThePost={deleteThePost} />
+      </>
+    )
+    : <></>;
 };
 
-export const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
-  posts.map((post, i) => (
+export const CreateFeed = ({ posts, deleteThePost }: DeletePost) => {
+  console.log({ posts });
+  return posts.map((post, i) => (
     <Feed post={post} key={i} deleteThePost={deleteThePost} />
   ));
-
+};
 export const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => (
   <div>
     <h1>Feed</h1>
