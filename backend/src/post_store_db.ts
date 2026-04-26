@@ -1,17 +1,34 @@
-import { Db, ObjectId } from "mongodb";
+import { Collection, Db, ObjectId } from "mongodb";
 
 type Credentials = {
   userName: string;
   password: string;
 };
 
+type User = {
+  _id?: ObjectId;
+  user: string;
+  password: string;
+  subscribed: string[];
+};
+
+type Post = {
+  _id?: ObjectId;
+  title: string;
+  body: string;
+  user: string;
+  date: number;
+  userId: string;
+  likes: string[];
+};
+
 export class PostStoreDB {
-  #posts;
-  #users;
+  #posts: Collection<Post>;
+  #users: Collection<User>;
 
   constructor(db: Db) {
-    this.#posts = db.collection("posts");
-    this.#users = db.collection("users");
+    this.#posts = db.collection<Post>("posts");
+    this.#users = db.collection<User>("users");
   }
 
   async loginUser({ userName, password }: Credentials) {
@@ -19,7 +36,7 @@ export class PostStoreDB {
       .find({ user: userName, password: password })
       .toArray();
 
-    if (isExist !== undefined) return { id: isExist._id };
+    if (isExist !== undefined) return { userId: isExist._id.toString() };
 
     const result = await this.#users.insertOne({
       user: userName,
@@ -27,7 +44,7 @@ export class PostStoreDB {
       subscribed: [],
     });
 
-    return { id: result.insertedId.toString() };
+    return { userId: result.insertedId.toString() };
   }
 
   async getUserData(userId: string) {
@@ -62,7 +79,7 @@ export class PostStoreDB {
     const usersPost = await this.#getAllPostsOfUser(userId);
     const { subscribed } = await this.getUserData(userId);
     const otherPosts = await Promise.all(
-      subscribed.map((id) => this.#getAllPostsOfUser(id)),
+      subscribed.map((id: string) => this.#getAllPostsOfUser(id)),
     );
 
     return { usersPost: [...usersPost, ...otherPosts.flat(2)] };
@@ -108,9 +125,7 @@ export class PostStoreDB {
       .find({ _id: new ObjectId(postId) })
       .toArray();
 
-    console.log(likes);
-
-    return { likesCount: likes.length };
+    return { likes };
   }
 
   async #unsubscribeUser(userId: string, id: string) {
@@ -121,7 +136,6 @@ export class PostStoreDB {
   }
 
   async #dislikePost(postId: string, userId: string) {
-    console.log(userId);
     await this.#posts.updateOne(
       { _id: new ObjectId(postId) },
       { $pull: { likes: userId } },

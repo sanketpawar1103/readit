@@ -1,13 +1,11 @@
 import { type SubmitEvent, useState } from "react";
-import { fetchGet, fetchPost } from "./Api.tsx";
-import type { Action } from "./Reducer.ts";
+import { fetchPost } from "./Api.tsx";
 
 const onFormSubmit = async (
   e: SubmitEvent<HTMLFormElement>,
   name: string,
   pass: string,
   setter: (x: boolean) => void,
-  dispatch: (x: Action) => void,
 ) => {
   e.preventDefault();
   await fetchPost("login", {
@@ -16,9 +14,6 @@ const onFormSubmit = async (
   });
 
   setter(true);
-  fetchGet("load-post").then((res) => {
-    dispatch({ act: "render-posts", posts: res.usersPost });
-  });
 };
 
 const UserName = ({ setName }) => (
@@ -44,7 +39,7 @@ const Password = ({ setPass }) => (
 
 const SubmitForm = () => <button type="submit">Login</button>;
 
-export const Auth = ({ setter, dispatch }) => {
+export const Auth = ({ setter }) => {
   const [name, setName] = useState("");
   const [pass, setPass] = useState("");
 
@@ -53,13 +48,15 @@ export const Auth = ({ setter, dispatch }) => {
       <h1>Login</h1>
       <form
         onSubmit={async (e) => {
-          await onFormSubmit(e, name, pass, setter, dispatch);
+          await onFormSubmit(e, name, pass, setter);
         }}
       >
         <UserName setName={setName} />
         <Password setPass={setPass} />
         <SubmitForm />
       </form>
+
+      <a href="http://localhost:8000/auth-with-git">Login with Github</a>
     </>
   );
 };

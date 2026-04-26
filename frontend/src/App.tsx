@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from "react";
-import { type Action, type Post, Reducer } from "./Reducer.ts";
+import { type Action, Reducer } from "./Reducer.ts";
 import { DisplayFeed } from "./Feed.tsx";
 import { fetchGet } from "./Api.tsx";
 import { SearchBar } from "./SearchBar.tsx";
@@ -7,27 +7,8 @@ import { DisplayForm } from "./CreatePost.tsx";
 import { Auth } from "./Authentication.tsx";
 
 export type Dispatch = (action: Action) => void;
-type LoadPageAttr = { dispatch: Dispatch; posts: Post[] };
 
-const LoadPage = ({ dispatch, posts }: LoadPageAttr) => {
-  const [_isLoggedIn, setLoggedIn] = useState(false);
-
-  return (
-    <div>
-      {_isLoggedIn
-        ? (
-          <>
-            <SearchBar dispatch={dispatch} posts={posts} />
-            <DisplayForm saveThePost={dispatch} posts={posts} />
-            <DisplayFeed deleteThePost={dispatch} posts={posts} />
-          </>
-        )
-        : <Auth setter={setLoggedIn} dispatch={dispatch} />}
-    </div>
-  );
-};
-
-const App = () => {
+const MainPage = () => {
   const [posts, dispatch] = useReducer(Reducer, []);
 
   useEffect(() => {
@@ -36,7 +17,24 @@ const App = () => {
     });
   }, []);
 
-  return <LoadPage dispatch={dispatch} posts={posts} />;
+  return (
+    <>
+      <SearchBar dispatch={dispatch} />
+      <DisplayForm saveThePost={dispatch} posts={posts} />
+      <DisplayFeed deleteThePost={dispatch} posts={posts} />
+    </>
+  );
+};
+
+const App = () => {
+  const [_isLoggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetchGet("get-user-data").then(({ success }) => setLoggedIn(success));
+  }, [_isLoggedIn]);
+
+  return <div>{_isLoggedIn ? <MainPage /> : <Auth setter={setLoggedIn} />}
+  </div>;
 };
 
 export default App;

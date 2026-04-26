@@ -43,7 +43,10 @@ export const DeleteButton = ({ post, deleteThePost }) => (
       type="button"
       onClick={(e) => {
         fetchPost("toggle-like", { postId: post._id }).then(
-          (res) => (e.target.innerText = `Likes ${res.likesCount}`),
+          (
+            res,
+          ) => ((e.target as HTMLButtonElement).innerText =
+            `Likes ${res.likes.length}`),
         );
       }}
     >
@@ -58,12 +61,7 @@ export const Feed = ({ post, deleteThePost }: FeedProps) =>
     ? (
       <>
         <h2>{post.user}</h2>
-        <p>
-          {format(
-            new Date(post.date || "1776964218892"),
-            "MMM d, yyyy • hh:mm a",
-          )}
-        </p>
+        <p>{format(new Date(post.date), "MMM d, yyyy • hh:mm a")}</p>
         <h1>{post.title}</h1>
         <p>{post.body}</p>
         <DeleteButton post={post} deleteThePost={deleteThePost} />
