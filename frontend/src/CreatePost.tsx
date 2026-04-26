@@ -3,6 +3,12 @@ import { fetchPost } from "./Api.tsx";
 import { type Action, type Post } from "./Reducer.ts";
 import { type Dispatch } from "./App.tsx";
 
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Paper from "@mui/material/Paper";
+
 type Res = { user: string; date: Date; id: string; userId: string };
 
 type DisplayFormProps = {
@@ -10,33 +16,34 @@ type DisplayFormProps = {
   posts: Post[];
 };
 
-const FormTitle = () => <h1>Create Post</h1>;
+const FormTitle = () => (
+  <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
+    Create Post
+  </Typography>
+);
 
 const PostDescription = ({ setBody }) => (
-  <>
-    <p>Body</p>
-    <textarea
-      name="body"
-      placeholder="Write your post..."
-      rows={5}
-      cols={50}
-      onChange={(e) => setBody(e.target.value)}
-    >
-    </textarea>
-  </>
+  <TextField
+    label="Body"
+    name="body"
+    placeholder="Write your post..."
+    multiline
+    rows={5}
+    fullWidth
+    onChange={(e) => setBody(e.target.value)}
+  />
 );
 
 const PostTitle = ({ setTitle }) => (
-  <>
-    <p>Title</p>
-    <input
-      type="text"
-      placeholder="Enter a title..."
-      name="title"
-      onChange={(e) => setTitle(e.target.value)}
-      required
-    />
-  </>
+  <TextField
+    label="Title"
+    type="text"
+    name="title"
+    placeholder="Enter a title..."
+    required
+    fullWidth
+    onChange={(e) => setTitle(e.target.value)}
+  />
 );
 
 const AddPost = async (
@@ -57,15 +64,22 @@ export const DisplayForm = ({ saveThePost }: DisplayFormProps) => {
   const [body, setBody] = useState("");
 
   return (
-    <form
+    <Paper
+      component="form"
+      sx={{ maxWidth: 700, mx: "auto", mt: 4, p: 3 }}
       onSubmit={async (e) => {
         await AddPost(e, title, body, saveThePost);
       }}
     >
-      <FormTitle />
-      <PostTitle setTitle={setTitle} />
-      <PostDescription setBody={setBody} />
-      <button type="submit">Post</button>
-    </form>
+      <Stack spacing={2}>
+        <FormTitle />
+        <PostTitle setTitle={setTitle} />
+        <PostDescription setBody={setBody} />
+
+        <Button type="submit" variant="contained">
+          Post
+        </Button>
+      </Stack>
+    </Paper>
   );
 };

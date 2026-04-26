@@ -1,42 +1,86 @@
 import { useState } from "react";
 import { fetchPost } from "./Api.tsx";
 
-const DisplaySuggestions = ({ suggestions, dispatch }) => {
-  return suggestions.map(({ user, _id, isSubscribed }, i: number) => {
-    return (
-      <div key={i}>
-        {user}
-        <button
-          type="button"
-          onClick={async (e) => {
-            e.preventDefault();
-            await fetchPost("toggle-subscribe", {
-              id: _id,
-            }).then((res) => {
-              if (res.posts) {
-                dispatch({ act: "render-posts", posts: res.posts });
-              } else dispatch({ act: "remove-posts", id: res.id });
-            });
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 
-            (e.target as HTMLElement).innerText =
-              (e.target as HTMLElement).innerText === "Unsubscribe"
-                ? "Subscribe"
-                : "Unsubscribe";
-          }}
-        >
-          {isSubscribed ? "Unsubscribe" : "Subscribe"}
-        </button>
-      </div>
-    );
-  });
+const manageSubscriptions = async (
+  _id: string,
+  dispatch,
+  setSubscribed,
+  subscribed: boolean,
+) => {
+  await fetchPost("toggle-subscribe", {
+    id: _id,
+  }).then((res) =>
+    res.posts
+      ? dispatch({ act: "render-posts", posts: res.posts })
+      : dispatch({ act: "remove-posts", id: res.id })
+  );
+
+  setSubscribed(!subscribed);
 };
 
-const SearchHead = () => <h1>Search Users</h1>;
+const SubscribeButton = ({ subscribed, _id, dispatch, setSubscribed }) => (
+  <Button
+    type="button"
+    variant={subscribed ? "outlined" : "contained"}
+    onClick={async () => {
+      await manageSubscriptions(_id, dispatch, setSubscribed, subscribed);
+    }}
+  >
+    {subscribed ? "Unsubscribe" : "Subscribe"}
+  </Button>
+);
+
+const Suggestions = ({ isSubscribed, user, _id, dispatch }) => {
+  const [subscribed, setSubscribed] = useState(isSubscribed);
+
+  return (
+    <Card key={_id} sx={{ mb: 2 }}>
+      <CardContent>
+        <Stack direction="row">
+          <Typography variant="body1" className="pr-40">
+            {user}
+          </Typography>
+          <SubscribeButton
+            _id={_id}
+            subscribed={subscribed}
+            setSubscribed={setSubscribed}
+            dispatch={dispatch}
+          />
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+};
+
+const DisplaySuggestions = ({ suggestions, dispatch }) =>
+  suggestions.map(({ user, _id, isSubscribed }) => (
+    <Suggestions
+      isSubscribed={isSubscribed}
+      user={user}
+      _id={_id}
+      dispatch={dispatch}
+    />
+  ));
+
+const SearchHead = () => (
+  <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
+    Search Users
+  </Typography>
+);
 
 const SearchBarInput = ({ setName }) => (
-  <input
+  <TextField
     type="search"
-    placeholder="search users"
+    label="Search users"
+    variant="outlined"
+    fullWidth
     onChange={(e) => {
       setName(e.target.value);
     }}
@@ -44,9 +88,9 @@ const SearchBarInput = ({ setName }) => (
 );
 
 const SearchBtn = ({ setSuggestions, initials }) => (
-  <span
-    onClick={async (e) => {
-      e.preventDefault();
+  <Button
+    variant="contained"
+    onClick={async () => {
       if (initials.trim().length > 0) {
         await fetchPost("search-users", { initials }).then((res) => {
           setSuggestions(res);
@@ -57,13 +101,13 @@ const SearchBtn = ({ setSuggestions, initials }) => (
     }}
   >
     Search
-  </span>
+  </Button>
 );
 
 const SearchList = ({ suggestions, dispatch }) => (
-  <div>
+  <Stack sx={{ mt: 3 }}>
     <DisplaySuggestions suggestions={suggestions} dispatch={dispatch} />
-  </div>
+  </Stack>
 );
 
 export const SearchBar = ({ dispatch }) => {
@@ -71,11 +115,15 @@ export const SearchBar = ({ dispatch }) => {
   const [suggestions, setSuggestions] = useState([]);
 
   return (
-    <>
+    <Stack sx={{ maxWidth: 700, mx: "auto", mt: 4 }}>
       <SearchHead />
-      <SearchBarInput setName={setName} />
-      <SearchBtn initials={search} setSuggestions={setSuggestions} />
+
+      <Stack direction="row" spacing={2}>
+        <SearchBarInput setName={setName} />
+        <SearchBtn initials={search} setSuggestions={setSuggestions} />
+      </Stack>
+
       <SearchList suggestions={suggestions} dispatch={dispatch} />
-    </>
+    </Stack>
   );
 };

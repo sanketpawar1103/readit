@@ -3,11 +3,12 @@ import { type Dispatch } from "./App.tsx";
 import { fetchPost } from "./Api.tsx";
 import type { Action, Post } from "./Reducer.ts";
 
-type Feed = {
-  post: Post;
-  posts: Post[];
-  deleteThePost: (act: string, x: Post[]) => void;
-};
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Divider from "@mui/material/Divider";
 
 type DeletePost = {
   posts: Post[];
@@ -29,54 +30,79 @@ const confirmTheDelete = async (post: Post, deleteThePost: Dispatch) => {
   }
 };
 
-export const DeleteButton = ({ post, deleteThePost }) => (
-  <div className="post-btns" style={{ display: "flex" }}>
-    <button
-      type="button"
-      onClick={async () => {
-        await confirmTheDelete(post, deleteThePost);
-      }}
-    >
-      Delete
-    </button>
-    <button
-      type="button"
-      onClick={(e) => {
-        fetchPost("toggle-like", { postId: post._id }).then(
-          (
-            res,
-          ) => ((e.target as HTMLButtonElement).innerText =
-            `Likes ${res.likes.length}`),
-        );
-      }}
-    >
-      Likes {post.likes.length}
-    </button>
-    <hr />
-  </div>
+const DeleteBtn = ({ post, deleteThePost }) => (
+  <Button
+    type="button"
+    variant="outlined"
+    color="error"
+    onClick={async () => {
+      await confirmTheDelete(post, deleteThePost);
+    }}
+  >
+    Delete
+  </Button>
+);
+
+const LikeBtn = ({ post }) => (
+  <Button
+    type="button"
+    variant="contained"
+    onClick={(e) => {
+      fetchPost("toggle-like", { postId: post._id }).then((res) => {
+        (e.target as HTMLButtonElement).innerText = `Likes ${res.likes.length}`;
+      });
+    }}
+  >
+    Likes {post.likes.length}
+  </Button>
+);
+
+const Actions = ({ post, deleteThePost }: FeedProps) => (
+  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+    <DeleteBtn deleteThePost={deleteThePost} post={post} />
+    <LikeBtn post={post} />
+  </Stack>
 );
 
 export const Feed = ({ post, deleteThePost }: FeedProps) =>
   post
     ? (
-      <>
-        <h2>{post.user}</h2>
-        <p>{format(new Date(post.date), "MMM d, yyyy • hh:mm a")}</p>
-        <h1>{post.title}</h1>
-        <p>{post.body}</p>
-        <DeleteButton post={post} deleteThePost={deleteThePost} />
-      </>
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+            {post.user}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {format(new Date(post.date), "MMM d, yyyy • hh:mm a")}
+          </Typography>
+
+          <Typography variant="h5" sx={{ mt: 2 }}>
+            {post.title}
+          </Typography>
+
+          <Typography variant="body1" sx={{ mt: 1 }}>
+            {post.body}
+          </Typography>
+
+          <Actions post={post} deleteThePost={deleteThePost} />
+        </CardContent>
+      </Card>
     )
     : <></>;
 
-export const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
+const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
   posts.map((post, i) => (
     <Feed post={post} key={i} deleteThePost={deleteThePost} />
   ));
 
 export const DisplayFeed = ({ posts, deleteThePost }: DeletePost) => (
-  <div>
-    <h1>Feed</h1>
+  <Stack sx={{ maxWidth: 700, mx: "auto", mt: 4 }}>
+    <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 2 }}>
+      Feed
+    </Typography>
+
+    <Divider sx={{ mb: 3 }} />
+
     <CreateFeed posts={posts} deleteThePost={deleteThePost} />
-  </div>
+  </Stack>
 );
