@@ -59,36 +59,35 @@ const LikeBtn = ({ post }) => (
 
 const Actions = ({ post, deleteThePost }: FeedProps) => (
   <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-    <DeleteBtn deleteThePost={deleteThePost} post={post} />
+    {post.currentUser === post.userId
+      ? <DeleteBtn deleteThePost={deleteThePost} post={post} />
+      : (
+        ""
+      )}
     <LikeBtn post={post} />
   </Stack>
 );
 
-export const Feed = ({ post, deleteThePost }: FeedProps) =>
-  post
-    ? (
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-            {post.user}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {format(new Date(post.date), "MMM d, yyyy • hh:mm a")}
-          </Typography>
+export const Feed = ({ post, deleteThePost }: FeedProps) => (
+  <Card sx={{ mb: 3 }}>
+    <CardContent>
+      <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+        {post.user}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {format(new Date(post.date), "MMM d, yyyy • hh:mm a")}
+      </Typography>
 
-          <Typography variant="h5" sx={{ mt: 2 }}>
-            {post.title}
-          </Typography>
-
-          <Typography variant="body1" sx={{ mt: 1 }}>
-            {post.body}
-          </Typography>
-
-          <Actions post={post} deleteThePost={deleteThePost} />
-        </CardContent>
-      </Card>
-    )
-    : <></>;
+      <Typography variant="h5" sx={{ mt: 2 }}>
+        Title - {post.title}
+      </Typography>
+      <Typography variant="body1" sx={{ mt: 1 }}>
+        Description - {post.body}
+      </Typography>
+      <Actions post={post} deleteThePost={deleteThePost} />
+    </CardContent>
+  </Card>
+);
 
 const CreateFeed = ({ posts, deleteThePost }: DeletePost) =>
   posts.map((post, i) => (

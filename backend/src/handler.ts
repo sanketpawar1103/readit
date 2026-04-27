@@ -18,6 +18,7 @@ export const loadPosts = async (c: Context) => {
   const instance = c.get("store");
   const userId = getCookie(c, "userId");
   const some = await instance.loadPosts(userId);
+  some.currentUser = userId;
 
   return c.json(some);
 };
@@ -158,7 +159,6 @@ export const gitCallbackHandler = async (c: Context) => {
 
 const getUserResFromGit = async (c: Context) => {
   const accessToken: AccessData = await getAccessToken(c);
-  console.log({ accessToken });
   const { login } = await getUserDetailsFromGit(accessToken);
   const instance = c.get("store");
   const res = await instance.loginUser({

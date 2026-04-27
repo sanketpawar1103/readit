@@ -13,7 +13,11 @@ const MainPage = () => {
 
   useEffect(() => {
     fetchGet("load-post").then((res) => {
-      dispatch({ act: "", posts: res.usersPost });
+      const posts = res.usersPost.flatMap((p) => ({
+        ...p,
+        currentUser: res.currentUser,
+      }));
+      dispatch({ act: "", posts });
     });
   }, []);
 

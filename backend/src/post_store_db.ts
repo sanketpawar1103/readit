@@ -81,8 +81,9 @@ export class PostStoreDB {
     const otherPosts = await Promise.all(
       subscribed.map((id: string) => this.#getAllPostsOfUser(id)),
     );
+    const res = [...usersPost, ...otherPosts.flat(2)].filter((p) => p);
 
-    return { usersPost: [...usersPost, ...otherPosts.flat(2)] };
+    return { usersPost: res };
   }
 
   async searchUsers(initials: string) {

@@ -8,6 +8,7 @@ export type Post = {
   date: string;
   userId: string;
   likes: string[];
+  currentUser: string;
 };
 
 export type Action =
@@ -36,6 +37,7 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
         user: action.user,
         userId: action.userId,
         likes: [],
+        currentUser: action._id,
       };
 
       return [newPost, ...posts];
