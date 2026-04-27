@@ -28,6 +28,7 @@ export const addPost = async (c: Context) => {
   const instance = c.get("store");
   const { title, body } = await c.req.json();
   const postDetails = await instance.addPost(title, body, userId);
+  postDetails.currentUser = userId;
 
   return c.json(postDetails);
 };

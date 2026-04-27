@@ -19,7 +19,7 @@ const manageSubscriptions = async (
   }).then((res) =>
     res.posts
       ? dispatch({ act: "render-posts", posts: res.posts })
-      : dispatch({ act: "remove-posts", id: res.id })
+      : dispatch({ act: "remove-posts", id: res.id }),
   );
 
   setSubscribed(!subscribed);
@@ -59,8 +59,8 @@ const Suggestions = ({ isSubscribed, user, _id, dispatch }) => {
   );
 };
 
-const DisplaySuggestions = ({ suggestions, dispatch }) =>
-  suggestions.map(({ user, _id, isSubscribed }) => (
+const DisplaySuggestions = ({ suggestions, dispatch }) => {
+  return suggestions.map(({ user, _id, isSubscribed }) => (
     <Suggestions
       isSubscribed={isSubscribed}
       user={user}
@@ -68,7 +68,7 @@ const DisplaySuggestions = ({ suggestions, dispatch }) =>
       dispatch={dispatch}
     />
   ));
-
+};
 const SearchHead = () => (
   <Typography variant="h4" sx={{ fontWeight: "bold", mb: 2 }}>
     Search Users

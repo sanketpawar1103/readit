@@ -9,7 +9,9 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 
-type Res = { user: string; date: Date; id: string; userId: string };
+type Res = {
+  user: string; date: Date; id: string; userId: string, currentUser: string
+ };
 
 type DisplayFormProps = {
   saveThePost: (action: Action) => void;
@@ -55,8 +57,19 @@ const AddPost = async (
   e.preventDefault();
   const body = { title, body: desc };
 
-  const { id, user, date, userId }: Res = await fetchPost("add-post", body);
-  saveThePost({ act: "add-post", _id: id, ...body, user, date, userId });
+  const { id, user, date, userId, currentUser }: Res = await fetchPost(
+    "add-post",
+    body,
+  );
+  saveThePost({
+    act: "add-post",
+    _id: id,
+    ...body,
+    user,
+    date,
+    userId,
+    currentUser,
+  });
 };
 
 export const DisplayForm = ({ saveThePost }: DisplayFormProps) => {

@@ -1,16 +1,5 @@
 import { Collection, Db, ObjectId } from "mongodb";
-
-type Credentials = {
-  userName: string;
-  password: string;
-};
-
-type User = {
-  _id?: ObjectId;
-  user: string;
-  password: string;
-  subscribed: string[];
-};
+import { Credentials, UserStore } from "./user_store_db.ts";
 
 type Post = {
   _id?: ObjectId;
@@ -24,39 +13,23 @@ type Post = {
 
 export class PostStoreDB {
   #posts: Collection<Post>;
-  #users: Collection<User>;
+  #users: UserStore;
 
-  constructor(db: Db) {
+  constructor(db: Db, userInstance: UserStore) {
     this.#posts = db.collection<Post>("posts");
-    this.#users = db.collection<User>("users");
+    this.#users = userInstance;
   }
 
-  async loginUser({ userName, password }: Credentials) {
-    const [isExist] = await this.#users
-      .find({ user: userName, password: password })
-      .toArray();
-
-    if (isExist !== undefined) return { userId: isExist._id.toString() };
-
-    const result = await this.#users.insertOne({
-      user: userName,
-      password: password,
-      subscribed: [],
-    });
-
-    return { userId: result.insertedId.toString() };
+  async loginUser(credentials: Credentials) {
+    return await this.#users.loginUser(credentials);
   }
 
   async getUserData(userId: string) {
-    const [result] = await this.#users
-      .find({ _id: new ObjectId(userId) })
-      .toArray();
-
-    return result;
+    return await this.#users.getUserData(userId);
   }
 
   async addPost(title: string, body: string, userId: string) {
-    const { user } = await this.getUserData(userId);
+    const { user } = await this.#users.getUserData(userId);
     const date = Date.now();
     const likes: string[] = [];
     const row = { title, body, user, date, userId, likes };
@@ -71,44 +44,19 @@ export class PostStoreDB {
     return { id };
   }
 
-  async #getAllPostsOfUser(userId: string) {
+  async getAllPostsOfUser(userId: string) {
     return (await this.#posts.find({ userId: userId }).toArray()).reverse();
   }
 
   async loadPosts(userId: string) {
-    const usersPost = await this.#getAllPostsOfUser(userId);
-    const { subscribed } = await this.getUserData(userId);
+    const usersPost = await this.getAllPostsOfUser(userId);
+    const { subscribed } = await this.#users.getUserData(userId);
     const otherPosts = await Promise.all(
-      subscribed.map((id: string) => this.#getAllPostsOfUser(id)),
+      subscribed.map((id: string) => this.getAllPostsOfUser(id)),
     );
     const res = [...usersPost, ...otherPosts.flat(2)].filter((p) => p);
 
     return { usersPost: res };
-  }
-
-  async searchUsers(initials: string) {
-    const matches = await this.#users
-      .find({ user: { $regex: "^" + initials, $options: "i" } })
-      .toArray();
-
-    return {
-      matches: matches.map(({ _id, user, subscribed }) => {
-        return { _id: _id.toString(), user, subscribed };
-      }),
-    };
-  }
-
-  async toggleSubscribe(id: string, userId: string) {
-    const { subscribed } = await this.getUserData(userId);
-    if (!subscribed.includes(id)) {
-      await this.#addToSubscribe(subscribed, id, userId);
-
-      return { posts: await this.#posts.find({ userId: id }).toArray() };
-    }
-
-    await this.#unsubscribeUser(userId, id);
-
-    return { id };
   }
 
   async toggleLike(postId: string, userId: string) {
@@ -129,26 +77,10 @@ export class PostStoreDB {
     return { likes };
   }
 
-  async #unsubscribeUser(userId: string, id: string) {
-    await this.#users.updateOne(
-      { _id: new ObjectId(userId) },
-      { $pull: { subscribed: id } },
-    );
-  }
-
   async #dislikePost(postId: string, userId: string) {
     await this.#posts.updateOne(
       { _id: new ObjectId(postId) },
       { $pull: { likes: userId } },
-    );
-  }
-
-  async #addToSubscribe(subscribed: string[], id: string, userId: string) {
-    subscribed.push(id);
-
-    await this.#users.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { subscribed: subscribed } },
     );
   }
 
@@ -159,5 +91,31 @@ export class PostStoreDB {
       { _id: new ObjectId(postId) },
       { $set: { likes: likes } },
     );
+  }
+
+  async #unsubscribeUser(userId: string, id: string) {
+    await this.#users.unSubscribe(userId, id);
+  }
+
+  async #addToSubscribe(subscribed: string[], id: string, userId: string) {
+    await this.#users.subscribe(subscribed, id, userId);
+  }
+
+  async toggleSubscribe(id: string, userId: string) {
+    const { subscribed } = await this.#users.getUserData(userId);
+
+    if (!subscribed.includes(id)) {
+      await this.#addToSubscribe(subscribed, id, userId);
+
+      return { posts: await this.getAllPostsOfUser(id) };
+    }
+
+    await this.#unsubscribeUser(userId, id);
+
+    return { id };
+  }
+
+  async searchUsers(initials: string) {
+    return await this.#users.searchUsers(initials);
   }
 }

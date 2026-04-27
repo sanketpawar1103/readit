@@ -13,14 +13,15 @@ export type Post = {
 
 export type Action =
   | {
-    act: "add-post";
-    title: string;
-    _id: string;
-    body: string;
-    user: string;
-    date: Date;
-    userId: string;
-  }
+      act: "add-post";
+      title: string;
+      _id: string;
+      body: string;
+      user: string;
+      date: Date;
+      userId: string;
+      currentUser: string;
+    }
   | { act: "delete-post"; post: Post }
   | { act: ""; posts: Post[] }
   | { act: "render-posts"; posts: Post[] }
@@ -37,7 +38,7 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
         user: action.user,
         userId: action.userId,
         likes: [],
-        currentUser: action._id,
+        currentUser: action.currentUser,
       };
 
       return [newPost, ...posts];
@@ -53,10 +54,9 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
     }
 
     case "remove-posts": {
-      const delPosts = posts.filter(({ userId }) => {
-        return userId !== action.id;
+      const delPosts = posts.filter((p) => {
+        return p.userId !== action.id;
       });
-
       return [...delPosts];
     }
 
