@@ -1,5 +1,6 @@
 import { getCookie, setCookie } from "hono/cookie";
 import { Context } from "hono";
+import cloudinary from "./config/cloudinary.ts";
 
 const APIS = {
   auth: "https://github.com/login/oauth/authorize",
@@ -7,6 +8,8 @@ const APIS = {
   userInfo: `https://api.github.com/user`,
   appPage: "http://localhost:5173/",
 };
+
+type ImageUrl = { imageUrl: string };
 
 type AccessData = {
   access_token: string;
@@ -23,16 +26,38 @@ export const loadPosts = async (c: Context) => {
   return c.json(some);
 };
 
+const uploadImage = async (image?: File) => {
+  if (!image) return { imageUrl: "" };
+
+  const bytes = new Uint8Array(await image.arrayBuffer());
+
+  const result = await new Promise<{ secure_url: string }>(
+    (resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: "readit-posts" }, (error, result) => {
+          if (error || !result) return reject(error);
+
+          resolve({ secure_url: result.secure_url });
+        })
+        .end(bytes);
+    },
+  );
+
+  return { imageUrl: result.secure_url };
+};
+
 export const addPost = async (c: Context) => {
   const userId = getCookie(c, "userId");
   const instance = c.get("store");
   const formData = await c.req.parseBody();
+
   const title = formData.title as string;
   const body = formData.body as string;
   const image = formData.image as File | undefined;
 
-  const postDetails = await instance.addPost(title, body, userId, image);
+  const { imageUrl }: ImageUrl = await uploadImage(image);
 
+  const postDetails = await instance.addPost(title, body, userId, imageUrl);
   postDetails.currentUser = userId;
 
   return c.json(postDetails);

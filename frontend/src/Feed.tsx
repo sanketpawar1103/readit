@@ -20,10 +20,8 @@ type FeedProps = {
   deleteThePost: (action: Action) => void;
 };
 
-const PostImage = ({ image }: { image?: string }) => {
-  if (!image) return null;
-
-  return (
+const PostImage = ({ image }: { image?: string }) =>
+  !image ? null : (
     <img
       src={image}
       alt="Post image"
@@ -36,7 +34,6 @@ const PostImage = ({ image }: { image?: string }) => {
       }}
     />
   );
-};
 
 const confirmTheDelete = async (post: Post, deleteThePost: Dispatch) => {
   const confirmMsg = `Do you want to delete post: ${post.title}`;
@@ -77,12 +74,12 @@ const LikeBtn = ({ post }) => (
 
 const Actions = ({ post, deleteThePost }: FeedProps) => (
   <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+    <LikeBtn post={post} />
     {post.currentUser === post.userId
       ? <DeleteBtn deleteThePost={deleteThePost} post={post} />
       : (
         ""
       )}
-    <LikeBtn post={post} />
   </Stack>
 );
 

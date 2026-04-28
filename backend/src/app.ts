@@ -13,13 +13,13 @@ import {
   toggleLike,
   toggleSubscribe,
 } from "./handler.ts";
-import { PostStoreDB } from "./post_store_db.ts";
+import { PostStore } from "./modules/post_store_db.ts";
 
 type AppVariables = {
-  store: PostStoreDB;
+  store: PostStore;
 };
 
-export const createApp = (store: PostStoreDB) => {
+export const createApp = (store: PostStore) => {
   const app = new Hono<{ Variables: AppVariables }>();
   app.use((c, next) => {
     c.set("store", store);

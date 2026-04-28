@@ -11,7 +11,7 @@ type Post = {
   likes: string[];
 };
 
-export class PostStoreDB {
+export class PostStore {
   #posts: Collection<Post>;
   #users: UserStore;
 
@@ -38,27 +38,10 @@ export class PostStoreDB {
     return (await this.#posts.find({ userId: userId }).toArray()).reverse();
   }
 
-  async getImageData(image?: File) {
-    if (!image) return "";
-
-    const buffer = await image.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-
-    let binary = "";
-    bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-
-    const base64 = btoa(binary);
-
-    return `data:${image.type};base64,${base64}`;
-  }
-
-  async addPost(title: string, body: string, userId: string, img?: File) {
+  async addPost(title: string, body: string, userId: string, image?: File) {
     const { user } = await this.#users.getUserData(userId);
     const date = Date.now();
     const likes: string[] = [];
-    const image = await this.getImageData(img);
     const row = { title, body, user, date, userId, likes, image };
     const result = await this.#posts.insertOne(row);
     const id = result.insertedId.toString();
