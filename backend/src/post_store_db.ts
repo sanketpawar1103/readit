@@ -28,16 +28,6 @@ export class PostStoreDB {
     return await this.#users.getUserData(userId);
   }
 
-  async addPost(title: string, body: string, userId: string) {
-    const { user } = await this.#users.getUserData(userId);
-    const date = Date.now();
-    const likes: string[] = [];
-    const row = { title, body, user, date, userId, likes };
-    const result = await this.#posts.insertOne(row);
-
-    return { id: result.insertedId.toString(), date, user, userId, likes };
-  }
-
   async deletePost(id: string, userId: string) {
     await this.#posts.deleteOne({ _id: new ObjectId(id), userId });
 
@@ -48,6 +38,33 @@ export class PostStoreDB {
     return (await this.#posts.find({ userId: userId }).toArray()).reverse();
   }
 
+  async getImageData(image?: File) {
+    if (!image) return "";
+
+    const buffer = await image.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+
+    let binary = "";
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+
+    const base64 = btoa(binary);
+
+    return `data:${image.type};base64,${base64}`;
+  }
+
+  async addPost(title: string, body: string, userId: string, img?: File) {
+    const { user } = await this.#users.getUserData(userId);
+    const date = Date.now();
+    const likes: string[] = [];
+    const image = await this.getImageData(img);
+    const row = { title, body, user, date, userId, likes, image };
+    const result = await this.#posts.insertOne(row);
+    const id = result.insertedId.toString();
+
+    return { id, date, user, userId, likes, image };
+  }
   async loadPosts(userId: string) {
     const usersPost = await this.getAllPostsOfUser(userId);
     const { subscribed } = await this.#users.getUserData(userId);

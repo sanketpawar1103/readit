@@ -26,8 +26,13 @@ export const loadPosts = async (c: Context) => {
 export const addPost = async (c: Context) => {
   const userId = getCookie(c, "userId");
   const instance = c.get("store");
-  const { title, body } = await c.req.json();
-  const postDetails = await instance.addPost(title, body, userId);
+  const formData = await c.req.parseBody();
+  const title = formData.title as string;
+  const body = formData.body as string;
+  const image = formData.image as File | undefined;
+
+  const postDetails = await instance.addPost(title, body, userId, image);
+
   postDetails.currentUser = userId;
 
   return c.json(postDetails);

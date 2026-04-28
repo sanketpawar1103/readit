@@ -20,6 +20,24 @@ type FeedProps = {
   deleteThePost: (action: Action) => void;
 };
 
+const PostImage = ({ image }: { image?: string }) => {
+  if (!image) return null;
+
+  return (
+    <img
+      src={image}
+      alt="Post image"
+      style={{
+        width: "100%",
+        maxHeight: "400px",
+        objectFit: "contain",
+        marginTop: "16px",
+        borderRadius: "8px",
+      }}
+    />
+  );
+};
+
 const confirmTheDelete = async (post: Post, deleteThePost: Dispatch) => {
   const confirmMsg = `Do you want to delete post: ${post.title}`;
   const body = { id: post._id };
@@ -74,6 +92,7 @@ export const Feed = ({ post, deleteThePost }: FeedProps) => (
       <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
         {post.user}
       </Typography>
+
       <Typography variant="body2" color="text.secondary">
         {format(new Date(post.date), "MMM d, yyyy • hh:mm a")}
       </Typography>
@@ -81,9 +100,13 @@ export const Feed = ({ post, deleteThePost }: FeedProps) => (
       <Typography variant="h5" sx={{ mt: 2 }}>
         Title - {post.title}
       </Typography>
+
       <Typography variant="body1" sx={{ mt: 1 }}>
         Description - {post.body}
       </Typography>
+
+      <PostImage image={post.image} />
+
       <Actions post={post} deleteThePost={deleteThePost} />
     </CardContent>
   </Card>

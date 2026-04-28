@@ -19,7 +19,7 @@ const manageSubscriptions = async (
   }).then((res) =>
     res.posts
       ? dispatch({ act: "render-posts", posts: res.posts })
-      : dispatch({ act: "remove-posts", id: res.id }),
+      : dispatch({ act: "remove-posts", id: res.id })
   );
 
   setSubscribed(!subscribed);
