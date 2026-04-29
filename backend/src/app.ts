@@ -3,16 +3,19 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import {
   addPost,
-  authWithGit,
   deletePost,
+  loadPosts,
+  toggleLike,
+} from "./controllers/post_controller.ts";
+
+import { searchUsers, toggleSubscribe } from "./controllers/user_controller.ts";
+
+import {
+  authWithGit,
   getUserDataAfterAuth,
   gitCallbackHandler,
-  loadPosts,
   loginUser,
-  searchUsers,
-  toggleLike,
-  toggleSubscribe,
-} from "./handler.ts";
+} from "./controllers/authentication_controller.ts";
 import { PostStore } from "./modules/post_store_db.ts";
 
 type AppVariables = {
