@@ -1,6 +1,9 @@
 import { getCookie, setCookie } from "hono/cookie";
 import { Context } from "hono";
 import cloudinary from "./config/cloudinary.ts";
+import jwt from "jsonwebtoken";
+
+const SECRET = Deno.env.get("JWT_SECRET")!;
 
 const APIS = {
   auth: "https://github.com/login/oauth/authorize",
@@ -17,13 +20,22 @@ type AccessData = {
   scope: string;
 };
 
+type userIdDecode = { userId: string };
+
+const getUserIdFromToken = (c: Context) => {
+  const token = getCookie(c, "token");
+  if (!token) throw new Error("Unauthorized User Access");
+
+  return jwt.verify(token, SECRET);
+};
+
 export const loadPosts = async (c: Context) => {
   const instance = c.get("store");
-  const userId = getCookie(c, "userId");
-  const some = await instance.loadPosts(userId);
-  some.currentUser = userId;
+  const { userId } = getUserIdFromToken(c);
+  const posts = await instance.loadPosts(userId);
+  posts.currentUser = userId;
 
-  return c.json(some);
+  return c.json(posts);
 };
 
 const uploadImage = async (image?: File) => {
@@ -47,7 +59,7 @@ const uploadImage = async (image?: File) => {
 };
 
 export const addPost = async (c: Context) => {
-  const userId = getCookie(c, "userId");
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const instance = c.get("store");
   const formData = await c.req.parseBody();
 
@@ -65,7 +77,8 @@ export const addPost = async (c: Context) => {
 
 export const deletePost = async (c: Context) => {
   const instance = c.get("store");
-  const userId = getCookie(c, "userId");
+
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const { id } = await c.req.json();
   const { deletedId } = await instance.deletePost(id, userId);
 
@@ -77,7 +90,9 @@ export const loginUser = async (c: Context) => {
   const credentials = await c.req.json();
   const { userId } = await instance.loginUser(credentials);
 
-  setCookie(c, "userId", userId, {
+  const token = jwt.sign({ userId }, SECRET);
+
+  setCookie(c, "token", token, {
     httpOnly: true,
     sameSite: "None",
     path: "/",
@@ -107,7 +122,8 @@ export const searchUsers = async (c: Context) => {
   const instance = c.get("store");
   const { initials } = await c.req.json();
   const match = await instance.searchUsers(initials);
-  const userId = getCookie(c, "userId");
+
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const subscriptionList = await instance.getUserData(userId);
   const result = mapSubscribers(subscriptionList.subscribed, match.matches);
 
@@ -117,7 +133,8 @@ export const searchUsers = async (c: Context) => {
 export const toggleSubscribe = async (c: Context) => {
   const instance = c.get("store");
   const { id } = await c.req.json();
-  const userId = getCookie(c, "userId");
+
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const posts = await instance.toggleSubscribe(id, userId);
 
   return c.json(posts);
@@ -126,7 +143,8 @@ export const toggleSubscribe = async (c: Context) => {
 export const toggleLike = async (c: Context) => {
   const instance = c.get("store");
   const { postId } = await c.req.json();
-  const userId = getCookie(c, "userId");
+
+  const { userId }: userIdDecode = getUserIdFromToken(c);
 
   const likeCount = await instance.toggleLike(postId, userId);
   return c.json(likeCount);
@@ -162,8 +180,8 @@ const getAccessToken = async (c: Context) =>
   }).then((res) => res.json());
 
 export const getUserDataAfterAuth = (c: Context) => {
-  const cookie = getCookie(c, "userId");
-  const response = !cookie ? { success: false } : { success: true };
+  const token = getCookie(c, "token");
+  const response = !token ? { success: false } : { success: true };
 
   return c.json(response);
 };
@@ -179,12 +197,15 @@ const getUserDetailsFromGit = async (accessToken: AccessData) =>
 export const gitCallbackHandler = async (c: Context) => {
   const res = await getUserResFromGit(c);
 
-  setCookie(c, "userId", res.userId, {
+  const token = jwt.sign({ userId: res.userId }, SECRET);
+
+  setCookie(c, "token", token, {
     httpOnly: true,
     path: "/",
     sameSite: "Lax",
     secure: false,
   });
+
   return c.redirect(APIS.appPage);
 };
 
