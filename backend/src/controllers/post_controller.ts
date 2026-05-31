@@ -2,6 +2,7 @@ import { Context } from "hono";
 import cloudinary from "../config/cloudinary.ts";
 import { getUserIdFromToken } from "./authentication_controller.ts";
 import { userIdDecode } from "./user_controller.ts";
+
 type ImageUrl = { imageUrl: string };
 
 export const loadPosts = async (c: Context) => {
@@ -51,9 +52,9 @@ export const addPost = async (c: Context) => {
 };
 
 export const deletePost = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const instance = c.get("store");
 
-  const { userId }: userIdDecode = getUserIdFromToken(c);
   const { id } = await c.req.json();
   const { deletedId } = await instance.deletePost(id, userId);
 
@@ -61,10 +62,9 @@ export const deletePost = async (c: Context) => {
 };
 
 export const toggleLike = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const instance = c.get("store");
   const { postId } = await c.req.json();
-
-  const { userId }: userIdDecode = getUserIdFromToken(c);
 
   const likeCount = await instance.toggleLike(postId, userId);
   return c.json(likeCount);

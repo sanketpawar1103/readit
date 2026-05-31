@@ -1,5 +1,5 @@
 import { Collection, Db, ObjectId } from "mongodb";
-import { Credentials, UserStore } from "./user_store_db.ts";
+import { UserStore, Credentials } from "./user_store_db.ts";
 
 type Post = {
   _id?: ObjectId;

@@ -17,12 +17,13 @@ const mapSubscribers = (subscriptionList: string[], matches: Matches[]) => {
     isSubscribed: subscriptionList.includes(_id),
   }));
 };
+
 export const searchUsers = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const instance = c.get("store");
   const { initials } = await c.req.json();
   const match = await instance.searchUsers(initials);
 
-  const { userId }: userIdDecode = getUserIdFromToken(c);
   const subscriptionList = await instance.getUserData(userId);
   const result = mapSubscribers(subscriptionList.subscribed, match.matches);
 
@@ -30,10 +31,10 @@ export const searchUsers = async (c: Context) => {
 };
 
 export const toggleSubscribe = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
   const instance = c.get("store");
   const { id } = await c.req.json();
 
-  const { userId }: userIdDecode = getUserIdFromToken(c);
   const posts = await instance.toggleSubscribe(id, userId);
 
   return c.json(posts);

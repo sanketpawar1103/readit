@@ -1,5 +1,5 @@
 import { Db } from "mongodb";
-import { makeSetUp } from "./setup_db.ts";
+import { makeSetUp } from "./src/config/setup_db.ts";
 import { createApp } from "./src/app.ts";
 import { PostStore } from "./src//modules/post_store_db.ts";
 import { UserStore } from "./src/modules/user_store_db.ts";
