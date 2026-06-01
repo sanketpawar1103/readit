@@ -1,14 +1,17 @@
 import { format } from "date-fns/format";
+import { useNavigate } from "react-router-dom";
 import { type Dispatch } from "./App.tsx";
 import { fetchPost } from "./Api.tsx";
 import type { Action, Post } from "./Reducer.ts";
 
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlined";
 
 type DeletePost = {
   posts: Post[];
@@ -72,9 +75,26 @@ const LikeBtn = ({ post }) => (
   </Button>
 );
 
+const CommentBtn = ({ post }: { post: Post }) => {
+  const navigate = useNavigate();
+  return (
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+      <IconButton
+        size="small"
+        onClick={() => navigate(`/post/${post._id}/comments`)}
+        aria-label="view comments"
+      >
+        <ChatBubbleOutlineIcon fontSize="small" />
+      </IconButton>
+      <Typography variant="body2">{post.commentCount ?? 0}</Typography>
+    </Stack>
+  );
+};
+
 const Actions = ({ post, deleteThePost }: FeedProps) => (
-  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+  <Stack direction="row" spacing={2} sx={{ mt: 2, alignItems: "center" }}>
     <LikeBtn post={post} />
+    <CommentBtn post={post} />
     {post.currentUser === post.userId
       ? <DeleteBtn deleteThePost={deleteThePost} post={post} />
       : (
