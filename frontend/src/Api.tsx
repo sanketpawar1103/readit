@@ -4,7 +4,9 @@ type Body =
   | { userName: string; password: string }
   | { initials: string }
   | { id: string; isSubscribed: boolean }
-  | { postId: string };
+  | { postId: string }
+  | { postId: string; text: string }
+  | { postId: string; commentId: string };
 
 export const fetchPost = (endPoint: string, body: Body) =>
   fetch(`http://localhost:8000/${endPoint}`, {
