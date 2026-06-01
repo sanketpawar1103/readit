@@ -10,6 +10,7 @@ export type Post = {
   likes: string[];
   currentUser: string;
   image?: string;
+  commentCount: number;
 };
 
 export type Action =
@@ -42,6 +43,7 @@ export const Reducer = (posts: Post[] | [], action: Action): Post[] => {
         likes: [],
         currentUser: action.currentUser,
         image: action.image,
+        commentCount: 0,
       };
 
       return [newPost, ...posts];
