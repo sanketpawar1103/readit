@@ -3,7 +3,10 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import {
   addPost,
+  addComment,
+  deleteComment,
   deletePost,
+  loadComments,
   loadPosts,
   toggleLike,
 } from "./controllers/post_controller.ts";
@@ -42,6 +45,9 @@ export const createApp = (store: PostStore) => {
   app.post("/toggle-like", toggleLike);
   app.get("/auth-with-git", authWithGit);
   app.get("/callback", gitCallbackHandler);
+  app.get("/load-comments", loadComments);
+  app.post("/add-comment", addComment);
+  app.post("/delete-comment", deleteComment);
 
   return app;
 };

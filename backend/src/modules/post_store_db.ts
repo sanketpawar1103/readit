@@ -51,7 +51,8 @@ export class PostStore {
     const { user } = await this.#users.getUserData(userId);
     const date = Date.now();
     const likes: string[] = [];
-    const row = { title, body, user, date, userId, likes, image };
+    const comments: Comment[] = [];
+    const row = { title, body, user, date, userId, likes, image, comments };
     const result = await this.#posts.insertOne(row);
     const id = result.insertedId.toString();
 
@@ -145,5 +146,45 @@ export class PostStore {
 
   async searchUsers(initials: string) {
     return await this.#users.searchUsers(initials);
+  }
+
+  async getComments(postId: string) {
+    const post = await this.#posts.findOne({ _id: new ObjectId(postId) });
+    return { comments: post?.comments ?? [] };
+  }
+
+  async addComment(postId: string, text: string, userId: string) {
+    const { user } = await this.#users.getUserData(userId);
+    const comment: Comment = {
+      _id: new ObjectId(),
+      text,
+      user,
+      userId,
+      date: Date.now(),
+    };
+
+    await this.#posts.updateOne(
+      { _id: new ObjectId(postId) },
+      { $push: { comments: comment } },
+    );
+
+    return { comment: { ...comment, _id: comment._id.toString() } };
+  }
+
+  async deleteComment(postId: string, commentId: string, userId: string) {
+    const post = await this.#posts.findOne({ _id: new ObjectId(postId) });
+    const comment = post?.comments?.find(
+      (c) => c._id.toString() === commentId,
+    );
+
+    if (!comment) return { error: "Comment not found", status: 404 };
+    if (comment.userId !== userId) return { error: "Forbidden", status: 403 };
+
+    await this.#posts.updateOne(
+      { _id: new ObjectId(postId) },
+      { $pull: { comments: { _id: new ObjectId(commentId) } } },
+    );
+
+    return { commentId };
   }
 }

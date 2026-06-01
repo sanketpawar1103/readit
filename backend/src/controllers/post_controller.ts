@@ -69,3 +69,35 @@ export const toggleLike = async (c: Context) => {
   const likeCount = await instance.toggleLike(postId, userId);
   return c.json(likeCount);
 };
+
+export const loadComments = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
+  const instance = c.get("store");
+  const postId = c.req.query("postId") as string;
+
+  const result = await instance.getComments(postId);
+  return c.json({ ...result, currentUser: userId });
+};
+
+export const addComment = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
+  const instance = c.get("store");
+  const { postId, text } = await c.req.json();
+
+  const result = await instance.addComment(postId, text, userId);
+  return c.json(result);
+};
+
+export const deleteComment = async (c: Context) => {
+  const { userId }: userIdDecode = getUserIdFromToken(c);
+  const instance = c.get("store");
+  const { postId, commentId } = await c.req.json();
+
+  const result = await instance.deleteComment(postId, commentId, userId);
+
+  if ("error" in result) {
+    return c.json({ error: result.error }, result.status as 403 | 404);
+  }
+
+  return c.json(result);
+};
