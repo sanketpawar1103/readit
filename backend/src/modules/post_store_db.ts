@@ -1,6 +1,14 @@
 import { Collection, Db, ObjectId } from "mongodb";
 import { UserStore, Credentials } from "./user_store_db.ts";
 
+export type Comment = {
+  _id: ObjectId;
+  text: string;
+  user: string;
+  userId: string;
+  date: number;
+};
+
 type Post = {
   _id?: ObjectId;
   title: string;
@@ -9,6 +17,7 @@ type Post = {
   date: number;
   userId: string;
   likes: string[];
+  comments: Comment[];
 };
 
 export class PostStore {
@@ -48,11 +57,30 @@ export class PostStore {
 
     return { id, date, user, userId, likes, image };
   }
+  async #getFeedPostsForUser(userId: string) {
+    return await this.#posts.aggregate([
+      { $match: { userId } },
+      { $sort: { date: -1 } },
+      {
+        $project: {
+          title: 1,
+          body: 1,
+          user: 1,
+          date: 1,
+          userId: 1,
+          likes: 1,
+          image: 1,
+          commentCount: { $size: { $ifNull: ["$comments", []] } },
+        },
+      },
+    ]).toArray();
+  }
+
   async loadPosts(userId: string) {
-    const usersPost = await this.getAllPostsOfUser(userId);
+    const usersPost = await this.#getFeedPostsForUser(userId);
     const { subscribed } = await this.#users.getUserData(userId);
     const otherPosts = await Promise.all(
-      subscribed.map((id: string) => this.getAllPostsOfUser(id)),
+      subscribed.map((id: string) => this.#getFeedPostsForUser(id)),
     );
     const res = [...usersPost, ...otherPosts.flat(2)].filter((p) => p);
 
